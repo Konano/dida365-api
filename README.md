@@ -2,7 +2,7 @@
 
 An unofficial Python client library for the Dida365/TickTick API, supporting both the Chinese (Dida365) and international (TickTick) versions of the service. Built with modern async Python and robust error handling.
 
-This is a  package created to facilitate task management automation. It is not affiliated with or endorsed by Dida365 or TickTick.
+This is a package created to facilitate task management automation. It is not affiliated with or endorsed by Dida365 or TickTick.
 
 ## API Documentation References
 
@@ -31,24 +31,16 @@ pip install dida365
 ```python
 import asyncio
 from datetime import datetime, timezone
-from dida365 import Dida365Client, ServiceType, TaskCreate, ProjectCreate
+from dida365 import Dida365Client, ServiceType, TaskCreate, ProjectCreate, TaskPriority
 
 async def main():
     # Initialize client (credentials can also be loaded from .env file)
-    client = Dida365Client(
-        client_id="your_client_id",
-        client_secret="your_client_secret",
-        service_type=ServiceType.DIDA365,  # or ServiceType.TICKTICK
-        save_to_env=True  # Automatically save credentials and tokens to .env
-    )
+    client = Dida365Client()
 
     # If you have a token in .env, it will be loaded automatically
     # Otherwise, complete the OAuth2 flow:
     if not client.auth.token:
-        auth_url = client.get_authorization_url()
-        print(f"Please visit: {auth_url}")
-        code = input("Enter the authorization code: ")
-        await client.exchange_code(code)
+        await client.authenticate()
 
     # Create a project first
     project = await client.create_project(
@@ -76,90 +68,93 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
 ```
+
 ## CRUD Operations
+
+### Projects
+
+```python
+from dida365 import ProjectCreate, ProjectUpdate, ViewMode, ProjectKind, Dida365Client
+
+async def manage_projects(client: Dida365Client):
+    # Create a project
+    project = await client.create_project(
+        ProjectCreate(
+            name="My Project",
+            color="#FF0000",  # Optional: hex color code
+            view_mode=ViewMode.KANBAN,  # Optional: LIST, KANBAN, TIMELINE
+            kind=ProjectKind.TASK  # Optional: TASK, NOTE
+        )
+    )
+
+    # Get project we just created
+    project = await client.get_project(project_id=project.id)
+
+    # Get project with all tasks and columns
+    project_data = await client.get_project_with_data(project_id=project.id)
+    print(f"Project {project_data.project.name} has {len(project_data.tasks)} tasks")
+    for column in project_data.columns:  # Only present in KANBAN view
+        print(f"Column: {column.name}")
+
+    # Update project
+    updated_project = await client.update_project(
+        ProjectUpdate(
+            id=project.id,
+            name="Updated Project Name",
+            color="#00FF00",
+            view_mode=ViewMode.LIST
+        )
+    )
+
+    # Delete project
+    await client.delete_project(project_id=project.id)
+
+    # List all projects
+    projects = await client.get_projects()
+    for project in projects:
+        print(f"Project: {project.name} ({project.id})")
+```
 
 ### Tasks
 
 ```python
 from datetime import datetime, timezone
-from dida365 import TaskCreate, TaskUpdate, TaskPriority
+from dida365 import TaskCreate, TaskUpdate, TaskPriority, Dida365Client, Project
 
-# Create a task
-task = await client.create_task(
-    TaskCreate(
-        project_id=project.id,  # Required: tasks must belong to a project
-        title="Complete documentation",
-        content="Add CRUD examples",
-        priority=TaskPriority.HIGH,  # Enum: NONE, LOW, MEDIUM, HIGH
-        start_date=datetime.now(timezone.utc),
-        due_date=datetime.now(timezone.utc),
-        is_all_day=True,
-        time_zone="UTC"
+async def manage_tasks(client: Dida365Client, project: Project):
+    # Create a task
+    task = await client.create_task(
+        TaskCreate(
+            project_id=project.id,  # Required: tasks must belong to a project
+            title="Complete documentation",
+            content="Add CRUD examples",
+            priority=TaskPriority.HIGH,  # Enum: NONE, LOW, MEDIUM, HIGH
+            start_date=datetime.now(timezone.utc),
+            due_date=datetime.now(timezone.utc),
+            is_all_day=True,
+            time_zone="UTC"
+        )
     )
-)
 
-# Read a task
-task = await client.get_task(project_id=project.id, task_id=task.id)
+    # Read a task
+    task = await client.get_task(project_id=project.id, task_id=task.id)
 
-# Update a task
-updated_task = await client.update_task(
-    TaskUpdate(
-        id=task.id,
-        project_id=task.project_id,  # Both id and project_id are required
-        title="Updated title",
-        content="Added more details",
-        priority=TaskPriority.MEDIUM
+    # Update a task
+    updated_task = await client.update_task(
+        TaskUpdate(
+            id=task.id,
+            project_id=task.project_id,  # Both id and project_id are required
+            title="Updated title",
+            content="Added more details",
+            priority=TaskPriority.MEDIUM
+        )
     )
-)
 
-# Delete a task
-await client.delete_task(project_id=task.project_id, task_id=task.id)
-
-# Complete a task
-await client.complete_task(project_id=task.project_id, task_id=task.id)
-```
-
-### Projects
-
-```python
-from dida365 import ProjectCreate, ProjectUpdate, ViewMode, ProjectKind
-
-# Create a project
-project = await client.create_project(
-    ProjectCreate(
-        name="My Project",
-        color="#FF0000",  # Optional: hex color code
-        view_mode=ViewMode.KANBAN,  # Optional: LIST, KANBAN, TIMELINE
-        kind=ProjectKind.TASK  # Optional: TASK, NOTE
-    )
-)
-
-# Read project
-project = await client.get_project(project_id=project.id)
-
-# Get project with all tasks and columns
-project_data = await client.get_project_with_data(project_id=project.id)
-print(f"Project {project_data.project.name} has {len(project_data.tasks)} tasks")
-for column in project_data.columns:  # Only present in KANBAN view
-    print(f"Column: {column.name}")
-
-# Update project
-updated_project = await client.update_project(
-    ProjectUpdate(
-        id=project.id,
-        name="Updated Project Name",
-        color="#00FF00",
-        view_mode=ViewMode.LIST
-    )
-)
-
-# Delete project
-await client.delete_project(project_id=project.id)
-
-# List all projects
-projects = await client.get_projects()
-for project in projects:
-    print(f"Project: {project.name} ({project.id})")
+    # Complete a task
+    await client.complete_task(project_id=task.project_id, task_id=task.id)
+    
+    # Delete a task
+    await client.delete_task(project_id=task.project_id, task_id=task.id)
 ```
 
 ### State Management
@@ -256,7 +251,6 @@ except ValidationError as e:
 except ApiError as e:
     print(f"API error: {e.status_code} - {e.message}")
 ```
-
 
 ## Author
 
