@@ -79,12 +79,7 @@ token_info = await client.authenticate()
 
 ### Token Management
 
-- Tokens are automatically refreshed when needed
 - If `save_to_env=True`, tokens are saved to your `.env` file
-- You can manually refresh tokens:
-  ```python
-  await client.refresh_token()
-  ```
 
 ## Configuration Options
 

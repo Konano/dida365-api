@@ -5,6 +5,8 @@ This guide covers all task-related operations available in the API client.
 ## Task Models
 
 ### TaskCreate
+
+
 Used when creating a new task:
 
 ```python
@@ -12,7 +14,7 @@ from datetime import datetime, timezone
 from dida365 import TaskCreate, TaskPriority
 
 task = TaskCreate(
-    project_id="project_id",        # Required: Project ID
+    project_id="project_id",       # Required: Project ID, "" for inbox
     title="My Task",               # Required: Task title
     content="Task details",        # Optional: Task content
     desc="Task description",       # Optional: Task description
@@ -31,6 +33,13 @@ task = TaskCreate(
     ]
 )
 ```
+
+!!! note
+    If the provided `project_id` does not exist, the task will be created in the inbox. You can also explicitly create a task in the inbox by setting `project_id=""` (empty string).
+
+
+
+
 
 ### TaskUpdate
 Used when updating an existing task:

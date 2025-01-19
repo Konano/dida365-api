@@ -38,6 +38,7 @@ class Dida365Client:
         # Try to get credentials from args or env
         self.client_id = client_id or settings.client_id
         self.client_secret = client_secret or settings.client_secret
+        self.service_type = service_type or settings.service_type
         
         if not self.client_id or not self.client_secret:
             raise ValidationError(
@@ -110,6 +111,7 @@ class Dida365Client:
         lines = existing_lines
         lines = update_var(lines, "DIDA365_CLIENT_ID", self.client_id)
         lines = update_var(lines, "DIDA365_CLIENT_SECRET", self.client_secret)
+        lines = update_var(lines, "DIDA365_SERVICE_TYPE", "ticktick" if self.config.service_type == ServiceType.TICKTICK else "dida365")  # Update service type
         if access_token:
             lines = update_var(lines, "DIDA365_ACCESS_TOKEN", access_token)
 
@@ -142,13 +144,7 @@ class Dida365Client:
                 self._update_env_file(access_token=token_info.access_token)
         return token_info
 
-    async def refresh_token(self, refresh_token: Optional[str] = None) -> None:
-        """Refresh the access token."""
-        await self.auth.refresh_token(refresh_token=refresh_token)
-        if self.auth.token:
-            await self.http.set_token(self.auth.token.access_token)
-            if self.save_to_env:
-                self._update_env_file(access_token=self.auth.token.access_token)
+
 
     # Task-related methods
 

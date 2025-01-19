@@ -7,7 +7,7 @@ import tomli
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings
-
+from .config import ServiceType
 from .logger import setup_logging
 
 # Load environment variables from .env file
@@ -63,10 +63,10 @@ class Settings(BaseSettings):
     )
 
     # Service configuration
-    service_type: str = Field(
-        default=PYPROJECT_SETTINGS.get("default_service", "dida365"),
-        description="Service type (dida365 or ticktick)",
-        validation_alias=f"{ENV_PREFIX}SERVICE_TYPE"
+    service_type: ServiceType = Field(
+        default=PYPROJECT_SETTINGS.get("default_service", ServiceType.DIDA365),
+        description="Service type (dida365 or ticktick)", 
+        validation_alias=f"{ENV_PREFIX}SERVICE_TYPE",
     )
     custom_base_url: Optional[str] = Field(
         default=None,

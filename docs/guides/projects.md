@@ -70,6 +70,12 @@ for column in project_data.columns:  # Only in KANBAN view
     print(f"Column: {column.name}")
 ```
 
+
+!!! Inbox
+    The inbox is a special type of project that is not returned by `get_projects()`. However, you can still create tasks in the inbox by using an empty string (`""`) as the `project_id`. When you create a task in the inbox, the returned task's `project_id` will contain the actual inbox project_id.
+
+
+
 ### Update a Project
 
 ```python

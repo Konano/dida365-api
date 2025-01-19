@@ -12,7 +12,7 @@ from .logger import logger
 
 T = TypeVar("T")
 
-#The exact headers that work with the API
+# The exact headers that work with the API
 DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
     "Content-Type": "application/json"
@@ -43,7 +43,7 @@ class HttpClient:
         max_retries: int = 3
     ):
         """Initialize the HTTP client.
-        
+
         Args:
             config: API configuration
             timeout: Optional custom timeout settings
@@ -52,7 +52,7 @@ class HttpClient:
         self.config = config
         self.timeout = timeout or DEFAULT_TIMEOUT
         self.max_retries = max_retries
-        
+
         # Initialize session with proper settings
         self._session = httpx.AsyncClient(
             timeout=self.timeout,
@@ -113,7 +113,7 @@ class HttpClient:
                 error_code=error_code,
                 error_id=error_id
             ) from e
-        elif e.response.status_code == 404:
+        elif e.response.status_code == 404:  # TODO: Ticktick returns None for not found resource
             raise NotFoundError(
                 message=f"Resource not found: {url}",
                 error_code=error_code,
@@ -186,7 +186,7 @@ class HttpClient:
 
         url = self.config.get_api_url(endpoint)
         headers = self._get_headers()
-        
+
         self._log_request(url, method, headers, json_data)
 
         try:
@@ -222,7 +222,10 @@ class HttpClient:
 
     async def get(self, endpoint: str, *, model: Optional[Type[T]] = None) -> Optional[T]:
         """Send GET request."""
-        return await self._make_request("GET", endpoint, model=model)
+        response = await self._make_request("GET", endpoint, model=model)
+        if response is None:
+            raise NotFoundError(f"Resource not found: {endpoint}")
+        return response
 
     async def post(
         self,
@@ -246,4 +249,4 @@ class HttpClient:
 
     async def delete(self, endpoint: str) -> None:
         """Send DELETE request."""
-        await self._make_request("DELETE", endpoint) 
+        await self._make_request("DELETE", endpoint)

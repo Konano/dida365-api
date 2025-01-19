@@ -62,17 +62,6 @@ Exchange authorization code for access token.
 
 **Returns**: `TokenInfo` - Token information including access token and expiry
 
-#### refresh_token()
-
-```python
-async def refresh_token(refresh_token: Optional[str] = None) -> None
-```
-
-Refresh the access token.
-
-| Parameter | Type | Description | Default |
-|-----------|------|-------------|---------|
-| `refresh_token` | `Optional[str]` | Optional refresh token | `None` |
 
 ### Project Methods
 

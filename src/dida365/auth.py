@@ -21,7 +21,6 @@ class TokenInfo(BaseModel):
     access_token: str = Field(..., description="OAuth2 access token")
     token_type: str = Field(..., description="Token type (usually 'Bearer')")
     expires_in: int = Field(..., description="Token expiration time in seconds")
-    refresh_token: Optional[str] = Field(None, description="Refresh token for obtaining new access token")
     scope: str = Field(..., description="Granted permission scopes")
     created_at: float = Field(default_factory=time.time, description="Token creation timestamp")
 
@@ -187,33 +186,4 @@ class OAuth2Manager:
         finally:
             self._cleanup_server()
 
-    async def refresh_token(self, refresh_token: Optional[str] = None) -> None:
-        """Refresh the access token using a refresh token."""
-        if not refresh_token and not self.token:
-            raise AuthenticationError("No refresh token available")
-            
-        refresh_token = refresh_token or self.token.refresh_token
-        if not refresh_token:
-            raise AuthenticationError("No refresh token available")
-
-        data = {
-            "client_id": self.client_id,
-            "client_secret": self.client_secret,
-            "refresh_token": refresh_token,
-            "grant_type": "refresh_token",
-        }
-
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(
-                    self.config.token_url,
-                    data=data,
-                )
-                response.raise_for_status()
-                self.token = TokenInfo(**response.json())
-        except (httpx.ReadTimeout, httpx.ConnectTimeout, httpx.WriteTimeout, httpx.PoolTimeout) as e:
-            raise AuthenticationError("Token refresh request timed out") from e
-        except httpx.HTTPError as e:
-            raise AuthenticationError(f"Token refresh failed: {str(e)}") from e
-
-
+   
