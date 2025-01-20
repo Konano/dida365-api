@@ -210,6 +210,6 @@ class Column(BaseApiModel, SortableMixin):
 class ProjectData(BaseApiModel):
     """Model for complete project data including tasks and columns."""
 
-    project: Project = Field(..., description="Project information")
+    project: Optional[Project] = Field(default=None, description="Project information")
     tasks: List[Task] = Field(default_factory=list, description="List of tasks in the project")
-    columns: List[Column] = Field(default_factory=list, description="List of columns in the project") 
+    columns: List[Column] = Field(default_factory=list, description="List of columns in the project")
