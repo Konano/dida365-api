@@ -121,10 +121,11 @@ class Settings(BaseSettings):
         validation_alias=f"{ENV_PREFIX}MAX_RETRIES"
     )
 
-    class Config:
-        """Pydantic configuration."""
-        env_file = ".env"
-        case_sensitive = True
+    model_config = {
+        "env_file": ".env",
+        "case_sensitive": True,
+        "extra": "allow"  # Allow extra fields in environment variables
+    }
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

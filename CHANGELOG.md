@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Made `project` field optional in `ProjectData` model to handle API responses more flexibly
 - Fixed linting issues in project models
+- Allow extra environment variables in .env file to better support integration with other packages
 
 ## [0.1.3] - 2025-01-19
 - Fix bug that service type is not being saved. 
