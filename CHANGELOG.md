@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.1.5] - 2025-01-19
+
+### Changed
+- Made `project` field optional in `ProjectData` model to handle API responses more flexibly
+- Fixed linting issues in project models
+- Allow extra environment variables in .env file to better support integration with other packages
+- Updated settings to use Pydantic v2 model_config instead of Config class
+
 ## [0.1.4] - 2025-01-19
 
 ### Changed
