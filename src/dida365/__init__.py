@@ -1,5 +1,7 @@
 """Dida365/TickTick API client package."""
 
+from importlib.metadata import PackageNotFoundError, version as _metadata_version
+
 from .client import Dida365Client
 from .config import ApiConfig, ServiceType
 from .exceptions import ApiError, AuthenticationError, NotFoundError, RateLimitError, ValidationError
@@ -22,7 +24,10 @@ from .models.task import (
     TaskUpdate,
 )
 
-__version__ = "0.1.9"
+try:
+    __version__ = _metadata_version("dida365")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
 __all__ = [
     # Main client
     "Dida365Client",
