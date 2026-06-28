@@ -6,6 +6,7 @@ from importlib.metadata import version as _metadata_version
 from .client import Dida365Client
 from .config import ApiConfig, ServiceType
 from .exceptions import ApiError, AuthenticationError, NotFoundError, RateLimitError, ValidationError
+from .models.countdown import Countdown
 from .models.focus import Focus, FocusCreate, FocusType, PomodoroTaskBrief
 from .models.project import (
     Column,
@@ -50,6 +51,8 @@ __all__ = [
     # Configuration
     "ApiConfig",
     "ServiceType",
+    # Countdown models
+    "Countdown",
     # Exceptions
     "ApiError",
     "AuthenticationError",

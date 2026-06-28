@@ -9,6 +9,7 @@ from .config import ApiConfig, ServiceType
 from .exceptions import ValidationError
 from .http import HttpClient
 from .logger import logger
+from .models.countdown import Countdown
 from .models.focus import Focus, FocusCreate, FocusType
 from .models.project import (
     Column,
@@ -404,6 +405,17 @@ class Dida365Client:
             focus_type: Focus type (Pomodoro=0 or Timing=1).
         """
         await self.http.delete(f"focus/{focus_id}", params={"type": str(focus_type.value)})
+
+    # Countdown methods
+
+    async def get_countdowns(self) -> List[Countdown]:
+        """Get all countdown events.
+
+        Returns:
+            List of Countdown objects.
+        """
+        items = await self.http.get("countdown", model=List[Countdown])
+        return items
 
     # Project-related methods
 
