@@ -6,6 +6,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.2.0] - 2025-06-28
+
+### Added
+- Task API: `move_task` (batch move tasks between projects), `get_completed_tasks` (query completed tasks by project/date range), `filter_tasks` (filter tasks by project, date, priority, tags, status), `get_task_comments` / `add_task_comment` / `delete_task_comment` (task comment CRUD)
+- Task models: `Tag` (task labels with color and parent), `TaskKind` (TEXT/NOTE/CHECKLIST), `TaskMoveItem`/`TaskMoveResult`, `TaskFilterRequest`, `Comment`/`CommentCreate`; `Task` model extended with `tags`, `kind`, `etag` fields
+- Project Group API: `get_project_groups`, `create_project_group`, `update_project_group`, `delete_project_group` — manage project folders/groups
+- Project Group models: `ProjectGroup`, `ProjectGroupCreate`, `ProjectGroupUpdate`
+- Column API: `get_columns`, `create_column`, `update_column` — manage Kanban columns within a project
+- Column models: `Column`, `ColumnCreate`, `ColumnUpdate`
+- Tag API: `get_tags`, `create_tag` — list and create task tags/labels with color support
+- Focus API: `get_focus`, `get_focuses`, `create_focus`, `delete_focus` — Pomodoro timer and timing focus session management, with query parameter support on GET/DELETE requests
+- Focus models: `Focus`, `FocusCreate`, `FocusType` (POMODORO/TIMING), `PomodoroTaskBrief`
+- Countdown API: `get_countdowns` — list all countdown timer events
+- Countdown models: `Countdown` with reminder, repeat, and display configuration fields
+- Habit API: `get_habit`, `get_all_habits`, `create_habit`, `update_habit`, `create_or_update_habit_checkin`, `get_habit_checkins` — full habit tracking and daily check-in management
+- Habit models: `Habit`, `HabitCreate`, `HabitUpdate`, `HabitCheckin`, `HabitCheckinCreate`, `HabitCheckinData`
+
+### Fixed
+- Fixed `log_level` setting not being respected when debug mode is disabled
+
+### Removed
+- Removed unused `max_retries` setting
+- Removed unused `self.state` local cache from `Dida365Client`
+- Removed duplicate module-level `setup_logging()` call
+
 ## [0.1.9] - 2025-01-24
 
 ### Added
