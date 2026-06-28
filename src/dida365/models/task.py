@@ -250,3 +250,35 @@ class Comment(BaseApiModel, TimestampMixin):
     title: str = Field(..., description="Comment text")
     reply_comment_id: Optional[str] = Field(None, description="Reply comment identifier")
     reply_user_id: Optional[int] = Field(None, description="Reply user id")
+
+
+# ---- Tag ----
+
+
+class Tag(BaseApiModel, SortableMixin):
+    """Model for a tag.
+
+    Example:
+        ```python
+        tag = Tag(name="work", label="work", color="#F18181", type=1)
+        ```
+    """
+
+    name: str = Field(..., description="Tag name")
+    label: str = Field(..., description="Tag label")
+    color: Optional[str] = Field(None, description="Tag color")
+    parent: Optional[str] = Field(None, description="Parent tag name")
+    type: int = Field(default=1, description="Tag type: Personal=1, Team=2")
+
+
+class TagCreate(BaseApiModel):
+    """Model for creating a new tag.
+
+    Example:
+        ```python
+        tag = TagCreate(name="urgent", label="urgent")
+        ```
+    """
+
+    name: str = Field(..., description="Tag name (max 64 characters, lowercase, trimmed)")
+    label: str = Field(..., description="Tag label (max 64 characters, must match name when lowercased)")

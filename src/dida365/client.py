@@ -24,6 +24,8 @@ from .models.project import (
 from .models.task import (
     Comment,
     CommentCreate,
+    Tag,
+    TagCreate,
     Task,
     TaskCompletedRequest,
     TaskCreate,
@@ -318,6 +320,32 @@ class Dida365Client:
             comment_id: Comment identifier.
         """
         await self.http.delete(f"project/{project_id}/task/{task_id}/comment/{comment_id}")
+
+    # Tag methods
+
+    async def get_tags(self) -> List[Tag]:
+        """Get all tags.
+
+        Returns:
+            List of Tag objects.
+        """
+        tags = await self.http.get("tag", model=List[Tag])
+        return tags
+
+    async def create_tag(self, tag: TagCreate) -> Optional[Tag]:
+        """Create a new tag.
+
+        Args:
+            tag: TagCreate with name and label.
+
+        Returns:
+            The created Tag.
+        """
+        return await self.http.post(
+            "tag",
+            json_data=tag.model_dump(by_alias=True, exclude_none=True),
+            model=Tag,
+        )
 
     # Project-related methods
 
