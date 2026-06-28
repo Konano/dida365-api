@@ -192,7 +192,7 @@ class Dida365Client:
         """Update an existing task."""
         updated_task = await self.http.post(
             f"task/{task.id}",
-            json_data=task.model_dump(by_alias=True, exclude_none=True),
+            json_data=task.model_dump(by_alias=True, exclude_unset=True),
             model=Task,
         )
         return updated_task
