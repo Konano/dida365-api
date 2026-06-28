@@ -3,7 +3,6 @@
 import asyncio
 import threading
 import time
-
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Optional
 from urllib.parse import urlencode
