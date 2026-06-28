@@ -20,7 +20,7 @@ class Dida365Client:
         self,
         client_id: Optional[str] = None,
         client_secret: Optional[str] = None,
-        service_type: ServiceType = None,
+        service_type: Optional[ServiceType] = None,
         redirect_uri: str = "http://localhost:8080/callback",
         save_to_env: bool = True,
     ):
@@ -145,7 +145,7 @@ class Dida365Client:
         )
         return task
 
-    async def create_task(self, task: TaskCreate) -> Task:
+    async def create_task(self, task: TaskCreate) -> Optional[Task]:
         """Create a new task."""
         created_task = await self.http.post(
             "task",
@@ -156,7 +156,7 @@ class Dida365Client:
             self.state["tasks"].append(created_task.model_dump())
         return created_task
 
-    async def update_task(self, task: TaskUpdate) -> Task:
+    async def update_task(self, task: TaskUpdate) -> Optional[Task]:
         """Update an existing task."""
         updated_task = await self.http.post(
             f"task/{task.id}",
@@ -214,7 +214,7 @@ class Dida365Client:
                     self.state["tasks"].append(task_dict)
         return data
 
-    async def create_project(self, project: ProjectCreate) -> Project:
+    async def create_project(self, project: ProjectCreate) -> Optional[Project]:
         """Create a new project."""
         created_project = await self.http.post(
             "project",
@@ -225,7 +225,7 @@ class Dida365Client:
             self.state["projects"].append(created_project.model_dump())
         return created_project
 
-    async def update_project(self, project: ProjectUpdate) -> Project:
+    async def update_project(self, project: ProjectUpdate) -> Optional[Project]:
         """Update an existing project."""
         updated_project = await self.http.post(
             f"project/{project.id}",

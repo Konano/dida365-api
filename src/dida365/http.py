@@ -2,7 +2,7 @@
 
 import json
 from functools import wraps
-from typing import Any, Dict, Optional, Type, TypeVar
+from typing import Any, Dict, NoReturn, Optional, Type, TypeVar, get_args, get_origin
 
 import httpx
 from httpx import Timeout
@@ -56,9 +56,8 @@ class HttpClient:
         self.max_retries = max_retries
 
         # Initialize session with proper settings
-        self._session = httpx.AsyncClient(
-            timeout=self.timeout, headers=DEFAULT_HEADERS.copy(), follow_redirects=True)
-        self.token = None
+        self._session = httpx.AsyncClient(timeout=self.timeout, headers=DEFAULT_HEADERS.copy(), follow_redirects=True)
+        self.token: Optional[str] = None
 
     async def set_token(self, token: str):
         """Set the access token for authenticated requests."""
@@ -94,7 +93,7 @@ class HttpClient:
         if response.content:
             logger.debug(f"Response Body: {response.text}")
 
-    def _handle_error_response(self, e: httpx.HTTPStatusError, url: str) -> None:
+    def _handle_error_response(self, e: httpx.HTTPStatusError, url: str) -> NoReturn:
         """Handle error responses from the API."""
         error_data = {}
         try:
@@ -107,32 +106,29 @@ class HttpClient:
         error_id = error_data.get("errorId")
 
         if e.response.status_code == 401:
-            raise AuthenticationError(message="Authentication failed",
-                                      error_code=error_code, error_id=error_id) from e
+            raise AuthenticationError(message="Authentication failed", error_code=error_code, error_id=error_id) from e
         elif e.response.status_code == 404:  # TODO: Ticktick returns None for not found resource
-            raise NotFoundError(
-                message=f"Resource not found: {url}", error_code=error_code, error_id=error_id) from e
+            raise NotFoundError(message=f"Resource not found: {url}", error_code=error_code, error_id=error_id) from e
         elif e.response.status_code == 429:
-            raise RateLimitError(message="Rate limit exceeded",
-                                 error_code=error_code, error_id=error_id) from e
+            raise RateLimitError(message="Rate limit exceeded", error_code=error_code, error_id=error_id) from e
         elif e.response.status_code == 400:
-            raise ValidationError(message=error_msg, error_code=error_code,
-                                  error_id=error_id) from e
+            raise ValidationError(message=error_msg, error_code=error_code, error_id=error_id) from e
         else:
-            raise ApiError(
-                message=f"API request failed: {error_msg}", error_code=error_code, error_id=error_id) from e
+            raise ApiError(message=f"API request failed: {error_msg}", error_code=error_code, error_id=error_id) from e
 
     def _parse_response(self, data: Any, model: Optional[Type[T]]) -> Optional[T]:
         """Parse response data according to the model type."""
-        if model is not None:
-            if isinstance(data, list):
-                # Handle List[T] types
-                if hasattr(model, "__origin__") and model.__origin__ is list:
-                    item_type = model.__args__[0]
-                    return [item_type(**item) for item in data]
-                return [model(**item) for item in data]
+        if model is None:
+            return None
+        if isinstance(data, list):
+            origin = get_origin(model)
+            if origin is list:
+                item_type = get_args(model)[0]
+                return [item_type(**item) for item in data]  # type: ignore[return-value]
+            else:
+                return [model(**item) for item in data]  # type: ignore[return-value]
+        else:
             return model(**data)
-        return None
 
     @retry_on_rate_limit
     async def _make_request(
@@ -204,7 +200,7 @@ class HttpClient:
         except Exception as e:
             raise ApiError(f"Unexpected error: {str(e)}")
 
-    async def get(self, endpoint: str, *, model: Optional[Type[T]] = None) -> Optional[T]:
+    async def get(self, endpoint: str, *, model: Optional[Type[T]] = None) -> T:
         """Send GET request."""
         response = await self._make_request("GET", endpoint, model=model)
         if response is None:

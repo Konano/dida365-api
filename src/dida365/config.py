@@ -32,7 +32,7 @@ def validate_url(url: str, allow_custom: bool = True) -> bool:
         if not allow_custom:
             valid_domain = result.netloc in ("api.dida365.com", "api.ticktick.com", "dida365.com", "ticktick.com")
             return valid_scheme and valid_domain
-        return valid_scheme and result.netloc
+        return bool(valid_scheme and result.netloc)
     except Exception:
         return False
 

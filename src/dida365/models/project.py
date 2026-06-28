@@ -23,7 +23,7 @@ class ViewMode(str, Enum):
     TIMELINE = "timeline"
 
     @classmethod
-    def _missing_(cls, value: str) -> Optional["ViewMode"]:
+    def _missing_(cls, value: object) -> Optional["ViewMode"]:
         """Handle case-insensitive lookup with warning."""
         if not isinstance(value, str):
             return None
@@ -54,7 +54,7 @@ class ProjectKind(str, Enum):
     NOTE = "NOTE"
 
     @classmethod
-    def _missing_(cls, value: str) -> Optional["ProjectKind"]:
+    def _missing_(cls, value: object) -> Optional["ProjectKind"]:
         """Handle case-insensitive lookup with warning."""
         if not isinstance(value, str):
             return None

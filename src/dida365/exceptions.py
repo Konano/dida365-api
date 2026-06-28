@@ -1,10 +1,12 @@
 """API exception classes."""
 
+from typing import Optional
+
 
 class ApiError(Exception):
     """Base exception for API errors."""
 
-    def __init__(self, message: str, error_code: str = None, error_id: str = None):
+    def __init__(self, message: str, error_code: Optional[str] = None, error_id: Optional[str] = None):
         self.message = message
         self.error_code = error_code
         self.error_id = error_id

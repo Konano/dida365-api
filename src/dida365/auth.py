@@ -49,8 +49,8 @@ class OAuth2Manager:
         self.redirect_uri = redirect_uri
         self.config = config
         self.token: Optional[TokenInfo] = None
-        self._server = None
-        self._server_thread = None
+        self._server: Optional[HTTPServer] = None
+        self._server_thread: Optional[threading.Thread] = None
 
     def get_authorization_url(
         self,
