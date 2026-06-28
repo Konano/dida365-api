@@ -45,6 +45,9 @@ Homepage = "https://github.com/Konano/dida365-api"
 Repository = "https://github.com/Konano/dida365-api"
 Changelog = "https://github.com/Konano/dida365-api/blob/main/CHANGELOG.md"
 
+[tool.flit.module]
+name = "dida365"
+
 [tool.flit.sdist]
 include = ["src/dida365"]
 
