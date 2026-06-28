@@ -11,6 +11,13 @@ from .http import HttpClient
 from .logger import logger
 from .models.countdown import Countdown
 from .models.focus import Focus, FocusCreate, FocusType
+from .models.habit import (
+    Habit,
+    HabitCheckin,
+    HabitCheckinCreate,
+    HabitCreate,
+    HabitUpdate,
+)
 from .models.project import (
     Column,
     ColumnCreate,
@@ -416,6 +423,96 @@ class Dida365Client:
         """
         items = await self.http.get("countdown", model=List[Countdown])
         return items
+
+    # Habit methods
+
+    async def get_habit(self, habit_id: str) -> Habit:
+        """Get a habit by ID.
+
+        Args:
+            habit_id: Habit identifier.
+
+        Returns:
+            The Habit record.
+        """
+        habit = await self.http.get(f"habit/{habit_id}", model=Habit)
+        return habit
+
+    async def get_all_habits(self) -> List[Habit]:
+        """Get all habits.
+
+        Returns:
+            List of Habit objects.
+        """
+        habits = await self.http.get("habit", model=List[Habit])
+        return habits
+
+    async def create_habit(self, habit: HabitCreate) -> Optional[Habit]:
+        """Create a new habit.
+
+        Args:
+            habit: HabitCreate with name and optional settings.
+
+        Returns:
+            The created Habit.
+        """
+        return await self.http.post(
+            "habit",
+            json_data=habit.model_dump(by_alias=True, exclude_none=True),
+            model=Habit,
+        )
+
+    async def update_habit(self, habit_id: str, habit: HabitUpdate) -> Optional[Habit]:
+        """Update an existing habit.
+
+        Args:
+            habit_id: Habit identifier.
+            habit: HabitUpdate with fields to update.
+
+        Returns:
+            The updated Habit.
+        """
+        return await self.http.post(
+            f"habit/{habit_id}",
+            json_data=habit.model_dump(by_alias=True, exclude_none=True),
+            model=Habit,
+        )
+
+    async def create_or_update_habit_checkin(
+        self, habit_id: str, checkin: HabitCheckinCreate
+    ) -> Optional[HabitCheckin]:
+        """Create or update a habit check-in.
+
+        Args:
+            habit_id: Habit identifier.
+            checkin: HabitCheckinCreate with stamp and value.
+
+        Returns:
+            The HabitCheckin result.
+        """
+        return await self.http.post(
+            f"habit/{habit_id}/checkin",
+            json_data=checkin.model_dump(by_alias=True, exclude_none=True),
+            model=HabitCheckin,
+        )
+
+    async def get_habit_checkins(self, habit_ids: str, from_stamp: int, to_stamp: int) -> List[HabitCheckin]:
+        """Get habit check-ins for a date range.
+
+        Args:
+            habit_ids: Comma-separated habit identifiers, e.g. "habit-1,habit-2".
+            from_stamp: Start date stamp in YYYYMMDD format.
+            to_stamp: End date stamp in YYYYMMDD format.
+
+        Returns:
+            List of HabitCheckin objects.
+        """
+        results = await self.http.get(
+            "habit/checkins",
+            params={"habitIds": habit_ids, "from": str(from_stamp), "to": str(to_stamp)},
+            model=List[HabitCheckin],
+        )
+        return results
 
     # Project-related methods
 

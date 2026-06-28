@@ -8,6 +8,14 @@ from .config import ApiConfig, ServiceType
 from .exceptions import ApiError, AuthenticationError, NotFoundError, RateLimitError, ValidationError
 from .models.countdown import Countdown
 from .models.focus import Focus, FocusCreate, FocusType, PomodoroTaskBrief
+from .models.habit import (
+    Habit,
+    HabitCheckin,
+    HabitCheckinCreate,
+    HabitCheckinData,
+    HabitCreate,
+    HabitUpdate,
+)
 from .models.project import (
     Column,
     ColumnCreate,
@@ -64,6 +72,13 @@ __all__ = [
     "FocusCreate",
     "FocusType",
     "PomodoroTaskBrief",
+    # Habit models
+    "Habit",
+    "HabitCheckin",
+    "HabitCheckinCreate",
+    "HabitCheckinData",
+    "HabitCreate",
+    "HabitUpdate",
     # Project models
     "Column",
     "ColumnCreate",
