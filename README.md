@@ -1,297 +1,234 @@
-# Dida365/TickTick API Client
-[![Documentation](https://img.shields.io/badge/docs-click%20here-blue)](https://cyfine.github.io/TickTick-Dida365-API-Client/)
+# dida365-api
 
 An unofficial Python client library for the Dida365/TickTick API, supporting both the Chinese (Dida365) and international (TickTick) versions of the service. Built with modern async Python and robust error handling.
 
-This is a package created to facilitate task management automation. It is not affiliated with or endorsed by Dida365 or TickTick.
+> **Forked from** [Cyfine/TickTick-Dida365-API-Client](https://github.com/Cyfine/TickTick-Dida365-API-Client) — thanks to [Carter Yifeng Cheng (@cyfine)](https://github.com/cyfine) for the original project.
 
-Project documentation is available [here](https://cyfine.github.io/TickTick-Dida365-API-Client/)
-
-## API Documentation References
-
-- Dida365 API: https://developer.dida365.com/api#/openapi
-- TickTick API: https://developer.ticktick.com/docs#/openapi
-
-## OAuth2 Setup
-
-1. Get your OAuth2 credentials:
-   - For TickTick: Visit https://developer.ticktick.com/manage
-   - For Dida365: Visit https://developer.dida365.com/manage
-   - Click "New App" to create a new application
-   - After creation, you'll receive your Client ID and Client Secret
-
-2. Configure OAuth2 redirect URL:
-   - In your Manage App page, click "Edit" of your newly created app
-   - Add the redirect URL: `http://localhost:8080/callback` at "OAuth redirect URL"
-   - Save the changes
-   - Note: If you want to use a different redirect URL, make sure to update it in both:
-     - The app settings on TickTick/Dida365 developer portal
-     - Your .env file (see below)
-
-3. Configure your credentials:
-   ```bash
-   # .env file
-   DIDA365_CLIENT_ID=your_client_id        # From step 1
-   DIDA365_CLIENT_SECRET=your_client_secret # From step 1
-   DIDA365_REDIRECT_URI=http://localhost:8080/callback  # From step 2
-   DIDA365_SERVICE_TYPE=ticktick  # or dida365
-   ```
-
-## Features
-
-- ✨ Full async support using `httpx`
-- 🔒 OAuth2 authentication with automatic token management
-- 📝 Type-safe with Pydantic v2 models
-- 🌐 Configurable endpoints (Dida365/TickTick)
-- 🛡️ Comprehensive error handling
-- ⚡ Automatic retry mechanism
-- 🔄 Environment file integration
-- 📊 State management for tasks and projects
+This is a community package created to facilitate task management automation. It is not affiliated with or endorsed by Dida365 or TickTick.
 
 ## Installation
 
+This fork is not published on PyPI. Install directly from GitHub:
+
 ```bash
-pip install dida365
+pip install git+https://github.com/Konano/dida365-api.git
 ```
 
 ## Quick Start
 
 ```python
 import asyncio
-from datetime import datetime, timezone
-from dida365 import Dida365Client, ServiceType, TaskCreate, ProjectCreate, TaskPriority
+from dida365 import Dida365Client, ServiceType, TaskCreate, TaskPriority
 
 async def main():
-    # Initialize client (credentials can also be loaded from .env file)
+    # Credentials can be passed via constructor, .env file, or environment variables
     client = Dida365Client(
-        client_id="your_client_id",  # Optional if in .env
-        client_secret="your_client_secret",  # Optional if in .env
-        service_type=ServiceType.TICKTICK,  # or DIDA365
-        redirect_uri="http://localhost:8080/callback",  # Optional
-        save_to_env=True  # Automatically save credentials and tokens to .env
+        client_id="your_client_id",
+        client_secret="your_client_secret",
+        service_type=ServiceType.TICKTICK,  # or ServiceType.DIDA365
+        redirect_uri="http://localhost:8080/callback",
+        save_to_env=True,  # automatically save credentials & tokens to .env
     )
 
-    # First-time authentication:
+    # If you already have an access_token, pass it directly to skip OAuth:
+    # client = Dida365Client(access_token="your_access_token")
+
+    # First-time authentication (opens browser, starts local callback server)
     if not client.auth.token:
-        # This will start a local server at the redirect_uri
-        # and open your browser for authorization
         await client.authenticate()
-        # Token will be automatically saved to .env if save_to_env=True
-
-    # Create a project
-    project = await client.create_project(
-        ProjectCreate(
-            name="My Project",
-            color="#FF0000"
-        )
-    )
 
     # Create a task
     task = await client.create_task(
         TaskCreate(
-            project_id=project.id,
+            project_id="your_project_id",
             title="My new task",
             content="Task description",
             priority=TaskPriority.HIGH,
-            start_date=datetime.now(timezone.utc),
-            is_all_day=False,
-            time_zone="UTC"
         )
     )
-    
     print(f"Created task: {task.title}")
 
 if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-## CRUD Operations
+## Configuration
 
-### Projects
+Credentials can be provided in three ways (checked in this order):
 
-```python
-from dida365 import ProjectCreate, ProjectUpdate, ViewMode, ProjectKind, Dida365Client
+1. **Constructor parameters** — directly pass `client_id`, `client_secret`, `access_token`, etc.
+2. **`.env` file** — create a `.env` in your working directory
+3. **Environment variables**
 
-async def manage_projects(client: Dida365Client):
-    # Create a project
-    project = await client.create_project(
-        ProjectCreate(
-            name="My Project",
-            color="#FF0000",  # Optional: hex color code
-            view_mode=ViewMode.KANBAN,  # Optional: LIST, KANBAN, TIMELINE
-            kind=ProjectKind.TASK  # Optional: TASK, NOTE
-        )
-    )
+Example `.env` file:
 
-    # Get project we just created
-    project = await client.get_project(project_id=project.id)
-
-    # Get project with all tasks and columns
-    project_data = await client.get_project_with_data(project_id=project.id)
-    print(f"Project {project_data.project.name} has {len(project_data.tasks)} tasks")
-    for column in project_data.columns:  # Only present in KANBAN view
-        print(f"Column: {column.name}")
-
-    # Update project
-    updated_project = await client.update_project(
-        ProjectUpdate(
-            id=project.id,
-            name="Updated Project Name",
-            color="#00FF00",
-            view_mode=ViewMode.LIST
-        )
-    )
-
-    # Delete project
-    await client.delete_project(project_id=project.id)
-
-    # List all projects
-    projects = await client.get_projects()
-    for project in projects:
-        print(f"Project: {project.name} ({project.id})")
+```bash
+DIDA365_CLIENT_ID=your_client_id
+DIDA365_CLIENT_SECRET=your_client_secret
+DIDA365_REDIRECT_URI=http://localhost:8080/callback
+DIDA365_SERVICE_TYPE=ticktick  # or dida365
+DIDA365_ACCESS_TOKEN=your_token  # optional: set to skip OAuth flow
 ```
+
+### OAuth2 Setup
+
+1. Get your credentials:
+   - TickTick: https://developer.ticktick.com/manage
+   - Dida365: https://developer.dida365.com/manage
+   - Click **New App**, then note your Client ID and Client Secret.
+2. In your app's settings, add the redirect URL: `http://localhost:8080/callback`
+
+## API Reference
+
+Official documentation:
+- Dida365 API: https://developer.dida365.com/api#/openapi
+- TickTick API: https://developer.ticktick.com/docs#/openapi
+
+## Usage
 
 ### Tasks
 
 ```python
-from datetime import datetime, timezone
-from dida365 import TaskCreate, TaskUpdate, TaskPriority, Dida365Client, Project
+from dida365 import TaskCreate, TaskUpdate, TaskPriority, TaskStatus
 
-async def manage_tasks(client: Dida365Client, project: Project):
-    # Create a task
-    task = await client.create_task(
-        TaskCreate(
-            project_id=project.id,  # Required: tasks must belong to a project
-            title="Complete documentation",
-            content="Add CRUD examples",
-            priority=TaskPriority.HIGH,  # Enum: NONE, LOW, MEDIUM, HIGH
-            start_date=datetime.now(timezone.utc),
-            due_date=datetime.now(timezone.utc),
-            is_all_day=True,
-            time_zone="UTC"
-        )
+# Create
+task = await client.create_task(
+    TaskCreate(
+        project_id="project_id",
+        title="Complete documentation",
+        priority=TaskPriority.HIGH,
     )
-
-    # Read a task
-    task = await client.get_task(project_id=project.id, task_id=task.id)
-
-    # Update a task
-    updated_task = await client.update_task(
-        TaskUpdate(
-            id=task.id,
-            project_id=task.project_id,  # Both id and project_id are required
-            title="Updated title",
-            content="Added more details",
-            priority=TaskPriority.MEDIUM
-        )
-    )
-
-    # Complete a task
-    await client.complete_task(project_id=task.project_id, task_id=task.id)
-    
-    # Delete a task
-    await client.delete_task(project_id=task.project_id, task_id=task.id)
-```
-
-### State Management
-
-The client maintains an internal state of tasks and projects:
-
-```python
-# Access cached state
-tasks = client.state["tasks"]
-projects = client.state["projects"]
-tags = client.state["tags"]
-
-# State is automatically updated when you:
-# 1. Create new items
-# 2. Update existing items
-# 3. Delete items
-```
-
-## Configuration
-
-The client can be configured through:
-1. Environment variables
-2. Constructor parameters
-3. pyproject.toml settings
-
-### Environment Variables
-
-Create a `.env` file:
-```bash
-# Required credentials
-DIDA365_CLIENT_ID=your_client_id
-DIDA365_CLIENT_SECRET=your_client_secret
-
-# Optional configurations
-DIDA365_SERVICE_TYPE=ticktick     # or dida365 
-DIDA365_ACCESS_TOKEN=your_token   # Will be saved automatically after auth
-DIDA365_BASE_URL=custom_url      # Optional: custom API endpoint
-DIDA365_LOG_LEVEL=INFO          # Optional: DEBUG, INFO, WARNING, ERROR
-```
-
-You can also use a custom `.env` file location:
-```python
-from dotenv import load_dotenv
-
-load_dotenv("/path/to/your/.env")
-client = Dida365Client()  # Will load from the specified .env file
-```
-
-### Request Timeouts
-
-Configure request timeouts in `pyproject.toml`:
-```toml
-[tool.dida365.request_timeout]
-connect = 10.0  # Connection timeout
-read = 30.0     # Read timeout
-write = 30.0    # Write timeout
-pool = 5.0      # Pool timeout
-```
-
-### Logging Configuration
-
-```toml
-[tool.dida365]
-log_level = "INFO"
-log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-log_date_format = "%Y-%m-%d %H:%M:%S"
-log_file = ""  # Set to a path to enable file logging
-debug = false
-```
-
-## Error Handling
-
-The library provides detailed error handling:
-
-```python
-from dida365.exceptions import (
-    ApiError,
-    AuthenticationError,
-    NotFoundError,
-    RateLimitError,
-    ValidationError
 )
 
-try:
-    task = await client.get_task("project_id", "task_id")
-except NotFoundError:
-    print("Task not found")
-except AuthenticationError:
-    print("Authentication failed - token may have expired")
-except RateLimitError as e:
-    print(f"Rate limit exceeded. Retry after {e.retry_after} seconds")
-except ValidationError as e:
-    print(f"Invalid data: {e}")
-except ApiError as e:
-    print(f"API error: {e.status_code} - {e.message}")
+# Read
+task = await client.get_task(project_id="project_id", task_id=task.id)
+
+# Update
+task = await client.update_task(
+    TaskUpdate(
+        id=task.id,
+        project_id=task.project_id,
+        title="Updated title",
+    )
+)
+
+# Complete
+await client.complete_task(project_id=task.project_id, task_id=task.id)
+
+# Delete
+await client.delete_task(project_id=task.project_id, task_id=task.id)
+
+# Filter tasks
+tasks = await client.filter_tasks(
+    project_ids=["project_id"],
+    priority=[TaskPriority.HIGH],
+    status=[TaskStatus.NORMAL],
+)
 ```
 
-## Author
+### Projects
 
-Carter Yifeng Cheng ([@cyfine](https://github.com/cyfine))
+```python
+from dida365 import ProjectCreate, ProjectUpdate, ViewMode
+
+# Create
+project = await client.create_project(
+    ProjectCreate(name="My Project", color="#FF0000", view_mode=ViewMode.KANBAN)
+)
+
+# List all
+projects = await client.get_projects()
+
+# Get with tasks & columns
+data = await client.get_project_with_data(project_id=project.id)
+
+# Update
+project = await client.update_project(
+    ProjectUpdate(id=project.id, name="Renamed Project")
+)
+
+# Delete
+await client.delete_project(project_id=project.id)
+```
+
+### Tags
+
+```python
+from dida365 import TagCreate
+
+# List tags
+tags = await client.get_tags()
+
+# Create a tag
+tag = await client.create_tag(TagCreate(name="urgent", label="urgent"))
+```
+
+### Habits
+
+```python
+from dida365 import HabitCreate, HabitUpdate
+
+# List all habits
+habits = await client.get_all_habits()
+
+# Create a habit
+habit = await client.create_habit(
+    HabitCreate(name="Morning run", color="#00FF00", sort_order=0)
+)
+
+# Update a habit
+habit = await client.update_habit(habit_id=habit.id, habit=HabitUpdate(name="Evening run"))
+
+# Get habit checkins
+checkins = await client.get_habit_checkins(
+    habit_ids=habit.id, from_stamp=20240101, to_stamp=20240131
+)
+```
+
+### Focus
+
+```python
+from datetime import datetime, timezone, timedelta
+from dida365 import FocusCreate, FocusType
+
+# Get focus sessions
+sessions = await client.get_focuses(
+    from_date="2024-01-01T00:00:00+0800",
+    to_date="2024-01-31T00:00:00+0800",
+    focus_type=FocusType.POMODORO,
+)
+
+# Create a focus session
+focus = await client.create_focus(
+    FocusCreate(
+        type=FocusType.POMODORO,
+        start_time=datetime(2024, 1, 1, 9, 0, 0, tzinfo=timezone(timedelta(hours=8))),
+        end_time=datetime(2024, 1, 1, 9, 25, 0, tzinfo=timezone(timedelta(hours=8))),
+        duration=1500,
+    )
+)
+```
+
+### Countdown
+
+```python
+# List all countdowns
+countdowns = await client.get_countdowns()
+```
+
+## Requirements
+
+- Python 3.10 or higher
+
+## Contributing
+
+Contributions are welcome! Feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+## Author
+
+Original project by [Carter Yifeng Cheng (@cyfine)](https://github.com/cyfine).  
+This fork maintained by [Konano](https://github.com/Konano).
