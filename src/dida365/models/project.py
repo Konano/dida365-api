@@ -119,7 +119,7 @@ class ProjectBase(BaseApiModel, SortableMixin):
         return v
 
 
-class ProjectCreate(BaseApiModel):
+class ProjectCreate(ProjectBase):
     """Model for creating a new project.
 
     Example:
@@ -133,32 +133,7 @@ class ProjectCreate(BaseApiModel):
         ```
     """
 
-    name: str = Field(..., description="Project name")
-    color: Optional[str] = Field(None, description="Project color (hex code)")
-    view_mode: ViewMode = Field(default=ViewMode.LIST, description="View mode (list, kanban, timeline)")
-    kind: ProjectKind = Field(default=ProjectKind.TASK, description="Project kind (TASK, NOTE)")
-
-    @field_validator("color")
-    def validate_color(cls, v: Optional[str]) -> Optional[str]:
-        """Validate and normalize color hex code format."""
-        if v is None:
-            return v
-
-        # Remove any whitespace
-        v = v.strip()
-
-        # Handle the # prefix
-        if not v.startswith("#"):
-            v = f"#{v}"
-
-        # Basic hex color validation
-        if not (len(v) == 7 and all(c in "0123456789ABCDEFabcdef#" for c in v)):
-            raise ValueError(
-                f"Invalid color hex code '{v}'. "
-                "Must be a 6-digit hex code with optional '#' prefix (e.g., '#FF0000' or 'FF0000')"
-            )
-
-        return v
+    name: str = Field(..., description="Project name")  # Override to make required
 
 
 class ProjectUpdate(ProjectBase):
