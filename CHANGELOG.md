@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.2.1] - 2025-06-28
+
+### Fixed
+- Added `ABANDONED` status to `TaskStatus` enum for consistency with observed API behavior
+- Renamed `tags` to `tag` in `filter_tasks` to match API specification
+- Updated default value of `is_all_day` to `True`
+- Used `Field(default=None)` keyword form for mypy compatibility
+- Used `exclude_unset` in `update_task` to avoid sending unintended defaults
+
 ## [0.2.0] - 2025-06-28
 
 ### Added
