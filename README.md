@@ -8,7 +8,11 @@ This is a community package created to facilitate task management automation. It
 
 ## Installation
 
-This fork is not published on PyPI. Install directly from GitHub:
+```bash
+pip install dida365-api
+```
+
+To install the latest development version directly from GitHub:
 
 ```bash
 pip install git+https://github.com/Konano/dida365-api.git
