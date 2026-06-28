@@ -3,7 +3,7 @@
 import asyncio
 import threading
 import time
-import webbrowser
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Optional
 from urllib.parse import urlencode
@@ -164,9 +164,9 @@ class OAuth2Manager:
             self._server_thread.daemon = True
             self._server_thread.start()
 
-            # Open browser for authorization
-            logger.debug("Opening browser for authorization...")
-            webbrowser.open(auth_url)
+            # Print auth URL for user to open manually
+            print(f"Please open the following URL in your browser to authorize:\n\n{auth_url}\n")
+            logger.debug("Auth URL printed to console")
 
             # Wait for the authorization code with timeout
             start_time = time.time()
