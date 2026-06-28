@@ -9,7 +9,7 @@ from .config import ApiConfig, ServiceType
 from .exceptions import ValidationError
 from .http import HttpClient
 from .logger import logger
-from .models.project import Project, ProjectCreate, ProjectData, ProjectUpdate
+from .models.project import Column, ColumnCreate, ColumnUpdate, Project, ProjectCreate, ProjectData, ProjectUpdate
 from .models.project_group import ProjectGroup, ProjectGroupCreate, ProjectGroupUpdate
 from .models.task import (
     Comment,
@@ -396,6 +396,53 @@ class Dida365Client:
             group_id: Project group identifier.
         """
         await self.http.delete(f"project/group/{group_id}")
+
+    # Column methods
+
+    async def get_columns(self, project_id: str) -> List[Column]:
+        """Get columns for a project.
+
+        Args:
+            project_id: Project identifier.
+
+        Returns:
+            List of Column objects.
+        """
+        cols = await self.http.get(f"project/{project_id}/column", model=List[Column])
+        return cols
+
+    async def create_column(self, project_id: str, column: ColumnCreate) -> Optional[Column]:
+        """Create a new column in a project.
+
+        Args:
+            project_id: Project identifier.
+            column: ColumnCreate with the column name.
+
+        Returns:
+            The created Column.
+        """
+        return await self.http.post(
+            f"project/{project_id}/column",
+            json_data=column.model_dump(by_alias=True, exclude_none=True),
+            model=Column,
+        )
+
+    async def update_column(self, project_id: str, column_id: str, column: ColumnUpdate) -> Optional[Column]:
+        """Update an existing column.
+
+        Args:
+            project_id: Project identifier.
+            column_id: Column identifier.
+            column: ColumnUpdate with fields to update.
+
+        Returns:
+            The updated Column.
+        """
+        return await self.http.post(
+            f"project/{project_id}/column/{column_id}",
+            json_data=column.model_dump(by_alias=True, exclude_none=True),
+            model=Column,
+        )
 
     # Authentication methods
 

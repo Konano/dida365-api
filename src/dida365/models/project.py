@@ -178,3 +178,27 @@ class ProjectData(BaseApiModel):
     project: Optional[Project] = Field(default=None, description="Project information")
     tasks: List[Task] = Field(default_factory=list, description="List of tasks in the project")
     columns: List[Column] = Field(default_factory=list, description="List of columns in the project")
+
+
+class ColumnCreate(BaseApiModel):
+    """Model for creating a new column.
+
+    Example:
+        ```python
+        col = ColumnCreate(name="To Do")
+        ```
+    """
+
+    name: str = Field(..., description="Column name (max 1000 characters)")
+
+
+class ColumnUpdate(BaseApiModel):
+    """Model for updating an existing column.
+
+    Example:
+        ```python
+        update = ColumnUpdate(name="Done")
+        ```
+    """
+
+    name: Optional[str] = Field(None, description="Column name (max 1000 characters)")

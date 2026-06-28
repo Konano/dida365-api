@@ -8,6 +8,8 @@ from .config import ApiConfig, ServiceType
 from .exceptions import ApiError, AuthenticationError, NotFoundError, RateLimitError, ValidationError
 from .models.project import (
     Column,
+    ColumnCreate,
+    ColumnUpdate,
     Project,
     ProjectCreate,
     ProjectData,
@@ -51,6 +53,8 @@ __all__ = [
     "ValidationError",
     # Project models
     "Column",
+    "ColumnCreate",
+    "ColumnUpdate",
     "Project",
     "ProjectCreate",
     "ProjectData",
