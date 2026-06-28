@@ -28,10 +28,8 @@ async def main():
         service_type=ServiceType.TICKTICK,  # or ServiceType.DIDA365
         redirect_uri="http://localhost:8080/callback",
         save_to_env=True,  # automatically save credentials & tokens to .env
+        # access_token="your_access_token",  # If you already have an access_token, pass it directly to skip OAuth
     )
-
-    # If you already have an access_token, pass it directly to skip OAuth:
-    # client = Dida365Client(access_token="your_access_token")
 
     # First-time authentication (opens browser, starts local callback server)
     if not client.auth.token:
