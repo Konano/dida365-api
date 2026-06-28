@@ -1,12 +1,12 @@
 """Authentication module for the API client."""
-import base64
-from typing import Dict, Optional
-from urllib.parse import urlencode
-import time
-import webbrowser
-from http.server import HTTPServer, BaseHTTPRequestHandler
+
 import asyncio
 import threading
+import time
+import webbrowser
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Optional
+from urllib.parse import urlencode
 
 import httpx
 from pydantic import BaseModel, Field
@@ -14,6 +14,7 @@ from pydantic import BaseModel, Field
 from .config import ApiConfig
 from .exceptions import AuthenticationError
 from .logger import logger
+
 
 class TokenInfo(BaseModel):
     """Model for OAuth2 token information."""
@@ -40,7 +41,7 @@ class OAuth2Manager:
         client_id: str,
         client_secret: str,
         config: ApiConfig,
-        redirect_uri: str = "http://localhost:8080/callback"
+        redirect_uri: str = "http://localhost:8080/callback",
     ):
         """Initialize OAuth2 manager."""
         self.client_id = client_id
@@ -132,58 +133,56 @@ class OAuth2Manager:
         """
         auth_code = None
         received_state = None
-        
+
         class CallbackHandler(BaseHTTPRequestHandler):
             def do_GET(self):
                 nonlocal auth_code, received_state
                 from urllib.parse import parse_qs, urlparse
-                
+
                 query = parse_qs(urlparse(self.path).query)
-                if 'code' in query:
-                    auth_code = query['code'][0]
-                if 'state' in query:
-                    received_state = query['state'][0]
-                
+                if "code" in query:
+                    auth_code = query["code"][0]
+                if "state" in query:
+                    received_state = query["state"][0]
+
                 self.send_response(200)
-                self.send_header('Content-type', 'text/html')
+                self.send_header("Content-type", "text/html")
                 self.end_headers()
                 self.wfile.write(b"Authorization successful! You can close this window.")
-                
+
             def log_message(self, format, *args):
                 # Suppress logging
                 pass
-        
+
         try:
             # Get authorization URL
             auth_url = self.get_authorization_url(scope=scope, state=state)
-            
+
             # Start local server
-            self._server = HTTPServer(('localhost', port), CallbackHandler)
+            self._server = HTTPServer(("localhost", port), CallbackHandler)
             self._server_thread = threading.Thread(target=self._server.serve_forever)
             self._server_thread.daemon = True
             self._server_thread.start()
-            
+
             # Open browser for authorization
             logger.debug("Opening browser for authorization...")
             webbrowser.open(auth_url)
-            
+
             # Wait for the authorization code with timeout
             start_time = time.time()
             while auth_code is None:
                 if time.time() - start_time > timeout:
                     raise AuthenticationError("Authentication timed out")
                 await asyncio.sleep(1)
-            
+
             # Verify state
             if received_state != state:
                 raise AuthenticationError("State mismatch in callback")
-            
+
             # Exchange code for token
             return await self.exchange_code(auth_code)
-            
+
         except Exception as e:
             raise AuthenticationError(f"Authentication failed: {str(e)}")
         finally:
             self._cleanup_server()
-
-   

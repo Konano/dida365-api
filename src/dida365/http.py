@@ -1,7 +1,8 @@
 """HTTP client module for making API requests."""
-from functools import wraps
-from typing import Any, Dict, Optional, Type, TypeVar, List
+
 import json
+from functools import wraps
+from typing import Any, Dict, Optional, Type, TypeVar
 
 import httpx
 from httpx import Timeout
@@ -14,34 +15,35 @@ T = TypeVar("T")
 
 # The exact headers that work with the API
 DEFAULT_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36",
-    "Content-Type": "application/json"
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/117.0.0.0 Safari/537.36"
+    ),
+    "Content-Type": "application/json",
 }
 
 # Default timeouts (in seconds)
 DEFAULT_TIMEOUT = Timeout(
-    connect=10.0,    # Maximum time to wait for a connection
-    read=30.0,       # Maximum time to wait for data
-    write=30.0,      # Maximum time to wait for data to be sent
-    pool=5.0         # Maximum time to wait for a connection from the pool
+    connect=10.0,  # Maximum time to wait for a connection
+    read=30.0,  # Maximum time to wait for data
+    write=30.0,  # Maximum time to wait for data to be sent
+    pool=5.0,  # Maximum time to wait for a connection from the pool
 )
 
 
 def retry_on_rate_limit(func):
     """Decorator to retry requests when rate limit is hit."""
+
     @wraps(func)
     async def wrapper(*args, **kwargs):
         return await func(*args, **kwargs)
+
     return wrapper
 
 
 class HttpClient:
-    def __init__(
-        self,
-        config: ApiConfig,
-        timeout: Optional[Timeout] = None,
-        max_retries: int = 3
-    ):
+    def __init__(self, config: ApiConfig, timeout: Optional[Timeout] = None, max_retries: int = 3):
         """Initialize the HTTP client.
 
         Args:
@@ -55,10 +57,7 @@ class HttpClient:
 
         # Initialize session with proper settings
         self._session = httpx.AsyncClient(
-            timeout=self.timeout,
-            headers=DEFAULT_HEADERS.copy(),
-            follow_redirects=True
-        )
+            timeout=self.timeout, headers=DEFAULT_HEADERS.copy(), follow_redirects=True)
         self.token = None
 
     async def set_token(self, token: str):
@@ -108,42 +107,27 @@ class HttpClient:
         error_id = error_data.get("errorId")
 
         if e.response.status_code == 401:
-            raise AuthenticationError(
-                message="Authentication failed",
-                error_code=error_code,
-                error_id=error_id
-            ) from e
+            raise AuthenticationError(message="Authentication failed",
+                                      error_code=error_code, error_id=error_id) from e
         elif e.response.status_code == 404:  # TODO: Ticktick returns None for not found resource
             raise NotFoundError(
-                message=f"Resource not found: {url}",
-                error_code=error_code,
-                error_id=error_id
-            ) from e
+                message=f"Resource not found: {url}", error_code=error_code, error_id=error_id) from e
         elif e.response.status_code == 429:
-            raise RateLimitError(
-                message="Rate limit exceeded",
-                error_code=error_code,
-                error_id=error_id
-            ) from e
+            raise RateLimitError(message="Rate limit exceeded",
+                                 error_code=error_code, error_id=error_id) from e
         elif e.response.status_code == 400:
-            raise ValidationError(
-                message=error_msg,
-                error_code=error_code,
-                error_id=error_id
-            ) from e
+            raise ValidationError(message=error_msg, error_code=error_code,
+                                  error_id=error_id) from e
         else:
             raise ApiError(
-                message=f"API request failed: {error_msg}",
-                error_code=error_code,
-                error_id=error_id
-            ) from e
+                message=f"API request failed: {error_msg}", error_code=error_code, error_id=error_id) from e
 
     def _parse_response(self, data: Any, model: Optional[Type[T]]) -> Optional[T]:
         """Parse response data according to the model type."""
         if model is not None:
             if isinstance(data, list):
                 # Handle List[T] types
-                if hasattr(model, '__origin__') and model.__origin__ is list:
+                if hasattr(model, "__origin__") and model.__origin__ is list:
                     item_type = model.__args__[0]
                     return [item_type(**item) for item in data]
                 return [model(**item) for item in data]
@@ -211,7 +195,7 @@ class HttpClient:
 
             return self._parse_response(data, model)
 
-        except (httpx.ReadTimeout, httpx.ConnectTimeout, httpx.WriteTimeout, httpx.PoolTimeout) as e:
+        except (httpx.ReadTimeout, httpx.ConnectTimeout, httpx.WriteTimeout, httpx.PoolTimeout):
             raise ApiError("Request timed out")
         except httpx.ConnectError:
             raise ApiError("Failed to connect to server")

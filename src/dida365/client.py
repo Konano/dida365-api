@@ -1,16 +1,16 @@
 """Main client module for the API."""
-from typing import List, Optional, Dict, Any
-import os
-from pathlib import Path
 
-from .auth import TokenInfo, OAuth2Manager
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from .auth import OAuth2Manager, TokenInfo
 from .config import ApiConfig, ServiceType
+from .exceptions import ValidationError
 from .http import HttpClient
-from .models.project import Project, ProjectCreate, ProjectUpdate, ProjectData
+from .logger import logger
+from .models.project import Project, ProjectCreate, ProjectData, ProjectUpdate
 from .models.task import Task, TaskCreate, TaskUpdate
 from .settings import settings
-from .exceptions import ValidationError
-from .logger import logger
 
 
 class Dida365Client:
@@ -22,10 +22,10 @@ class Dida365Client:
         client_secret: Optional[str] = None,
         service_type: ServiceType = None,
         redirect_uri: str = "http://localhost:8080/callback",
-        save_to_env: bool = True
+        save_to_env: bool = True,
     ):
         """Initialize the client.
-        
+
         Args:
             client_id: OAuth2 client ID (can be set via DIDA365_CLIENT_ID env var)
             client_secret: OAuth2 client secret (can be set via DIDA365_CLIENT_SECRET env var)
@@ -34,32 +34,24 @@ class Dida365Client:
             save_to_env: Whether to save credentials and token to .env file
         """
         self.save_to_env = save_to_env
-        
+
         # Try to get credentials from args or env
         self.client_id = client_id or settings.client_id
         self.client_secret = client_secret or settings.client_secret
         self.service_type = service_type or settings.service_type
-        
+
         if not self.client_id or not self.client_secret:
             raise ValidationError(
                 "Client ID and secret must be provided either through constructor "
                 "or environment variables (DIDA365_CLIENT_ID, DIDA365_CLIENT_SECRET)"
             )
-        
+
         self.config = ApiConfig(service_type=self.service_type)
         self.auth = OAuth2Manager(
-            client_id=self.client_id,
-            client_secret=self.client_secret,
-            config=self.config,
-            redirect_uri=redirect_uri
+            client_id=self.client_id, client_secret=self.client_secret, config=self.config, redirect_uri=redirect_uri
         )
         self.http = HttpClient(config=self.config)
-        self.state: Dict[str, List[Any]] = {
-            "tasks": [],
-            "projects": [],
-            "tags": [],
-            "project_folders": []
-        }
+        self.state: Dict[str, List[Any]] = {"tasks": [], "projects": [], "tags": [], "project_folders": []}
 
         # Load token from env if available and matches current client
         if settings.access_token and self._verify_token_client():
@@ -68,7 +60,7 @@ class Dida365Client:
                 access_token=settings.access_token,
                 token_type="Bearer",
                 expires_in=3600,  # Default 1 hour
-                scope="tasks:write tasks:read"
+                scope="tasks:write tasks:read",
             )
             self.http.token = settings.access_token
 
@@ -79,7 +71,7 @@ class Dida365Client:
 
     def _update_env_file(self, access_token: Optional[str] = None) -> None:
         """Update or create .env file with credentials and token.
-        
+
         Args:
             access_token: Optional new access token to save
         """
@@ -88,7 +80,7 @@ class Dida365Client:
 
         env_path = Path(".env")
         existing_lines = []
-        
+
         # Read existing env file if it exists
         if env_path.exists():
             with open(env_path, "r") as f:
@@ -111,21 +103,20 @@ class Dida365Client:
         lines = existing_lines
         lines = update_var(lines, "DIDA365_CLIENT_ID", self.client_id)
         lines = update_var(lines, "DIDA365_CLIENT_SECRET", self.client_secret)
-        lines = update_var(lines, "DIDA365_SERVICE_TYPE", "ticktick" if self.config.service_type == ServiceType.TICKTICK else "dida365")  # Update service type
+        lines = update_var(
+            lines, "DIDA365_SERVICE_TYPE", "ticktick" if self.config.service_type == ServiceType.TICKTICK else "dida365"
+        )  # Update service type
         if access_token:
             lines = update_var(lines, "DIDA365_ACCESS_TOKEN", access_token)
 
         # Write back to file
         with open(env_path, "w") as f:
             f.writelines(lines)
-        
+
         logger.debug("Updated .env file with new credentials/token")
 
     async def authenticate(
-        self,
-        scope: str = "tasks:write tasks:read",
-        state: str = "state",
-        port: int = 8080
+        self, scope: str = "tasks:write tasks:read", state: str = "state", port: int = 8080
     ) -> TokenInfo:
         """Complete OAuth2 authentication flow."""
         token_info = await self.auth.authenticate(scope=scope, state=state, port=port)
@@ -143,8 +134,6 @@ class Dida365Client:
             if self.save_to_env:
                 self._update_env_file(access_token=token_info.access_token)
         return token_info
-
-
 
     # Task-related methods
 
@@ -195,8 +184,7 @@ class Dida365Client:
         """Delete a task."""
         await self.http.delete(f"project/{project_id}/task/{task_id}")
         # Update state
-        self.state["tasks"] = [
-            t for t in self.state["tasks"] if t["id"] != task_id]
+        self.state["tasks"] = [t for t in self.state["tasks"] if t["id"] != task_id]
 
     # Project-related methods
 
@@ -256,8 +244,7 @@ class Dida365Client:
         """Delete a project."""
         await self.http.delete(f"project/{project_id}")
         # Update state
-        self.state["projects"] = [
-            p for p in self.state["projects"] if p["id"] != project_id]
+        self.state["projects"] = [p for p in self.state["projects"] if p["id"] != project_id]
 
     # Authentication methods
 

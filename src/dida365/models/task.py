@@ -1,7 +1,8 @@
 """Task-related models for the API client."""
+
 from datetime import datetime, timezone
 from enum import IntEnum
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 
 from pydantic import Field, field_serializer
 
@@ -36,10 +37,7 @@ class ChecklistItem(BaseApiModel, SortableMixin):
 
     id: Optional[str] = Field(None, description="Checklist item identifier")
     title: str = Field(..., description="Checklist item title")
-    status: ChecklistItemStatus = Field(
-        default=ChecklistItemStatus.NORMAL,
-        description="Completion status"
-    )
+    status: ChecklistItemStatus = Field(default=ChecklistItemStatus.NORMAL, description="Completion status")
     completed_time: Optional[datetime] = Field(None, description="Completion timestamp")
     is_all_day: bool = Field(default=False, description="Whether the item is all-day")
     start_date: Optional[datetime] = Field(None, description="Start date and time")
@@ -61,20 +59,20 @@ class TaskBase(BaseApiModel, SortableMixin):
     priority: TaskPriority = Field(default=TaskPriority.NONE, description="Task priority")
     items: List[ChecklistItem] = Field(default_factory=list, description="List of checklist items")
 
-    @field_serializer('start_date', 'due_date')
+    @field_serializer("start_date", "due_date")
     def serialize_datetime(self, dt: Optional[datetime], _info) -> Optional[str]:
         if dt is None:
             return None
         return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S+0000")
 
-    @field_serializer('priority')
+    @field_serializer("priority")
     def serialize_priority(self, priority: TaskPriority, _info) -> int:
         return int(priority)
 
 
 class TaskCreate(TaskBase):
     """Model for creating a new task.
-    
+
     Example:
         ```python
         task = TaskCreate(
@@ -92,7 +90,7 @@ class TaskCreate(TaskBase):
 
 class TaskUpdate(TaskBase):
     """Model for updating an existing task.
-    
+
     Example:
         ```python
         update = TaskUpdate(
@@ -110,15 +108,12 @@ class TaskUpdate(TaskBase):
 
 class Task(TaskBase, TimestampMixin):
     """Model for a complete task.
-    
+
     Includes all task data including system fields like ID and timestamps.
     """
 
     id: str = Field(..., description="Task identifier")
     project_id: str = Field(..., description="Project identifier")
     title: str = Field(..., description="Task title")  # Override to make required
-    status: TaskStatus = Field(
-        default=TaskStatus.NORMAL,
-        description="Task status"
-    )
-    completed_time: Optional[datetime] = Field(None, description="Completion timestamp") 
+    status: TaskStatus = Field(default=TaskStatus.NORMAL, description="Task status")
+    completed_time: Optional[datetime] = Field(None, description="Completion timestamp")

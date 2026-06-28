@@ -1,8 +1,8 @@
 """Simple logging configuration for debug output."""
+
 import logging
 import sys
 from typing import Optional
-
 
 # Create logger
 logger = logging.getLogger("dida365")
@@ -15,7 +15,7 @@ def setup_logging(
     log_file: Optional[str] = None,
 ) -> None:
     """Configure logging for the package.
-    
+
     Args:
         level: The logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         log_format: Format string for log messages
@@ -24,18 +24,18 @@ def setup_logging(
     """
     # Remove any existing handlers
     logger.handlers.clear()
-    
+
     # Set log level
     logger.setLevel(getattr(logging, level.upper()))
-    
+
     # Create formatters
     formatter = logging.Formatter(log_format, datefmt=date_format)
-    
+
     # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
-    
+
     # File handler if specified
     if log_file:
         try:
@@ -47,4 +47,4 @@ def setup_logging(
 
 
 # Set default logging configuration
-setup_logging() 
+setup_logging()

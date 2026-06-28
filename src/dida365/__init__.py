@@ -2,13 +2,7 @@
 
 from .client import Dida365Client
 from .config import ApiConfig, ServiceType
-from .exceptions import (
-    ApiError,
-    AuthenticationError,
-    NotFoundError,
-    RateLimitError,
-    ValidationError
-)
+from .exceptions import ApiError, AuthenticationError, NotFoundError, RateLimitError, ValidationError
 from .models.project import (
     Column,
     Project,
@@ -57,4 +51,4 @@ __all__ = [
     "TaskPriority",
     "TaskStatus",
     "TaskUpdate",
-] 
+]

@@ -1,6 +1,7 @@
 """Base models for the API client."""
+
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -10,8 +11,7 @@ class BaseApiModel(BaseModel):
 
     model_config = ConfigDict(
         populate_by_name=True,
-        alias_generator=lambda s: ''.join(word.capitalize() if i else word
-                                        for i, word in enumerate(s.split('_'))),
+        alias_generator=lambda s: "".join(word.capitalize() if i else word for i, word in enumerate(s.split("_"))),
     )
 
 
@@ -25,4 +25,4 @@ class TimestampMixin(BaseModel):
 class SortableMixin(BaseModel):
     """Mixin for models with sort order."""
 
-    sort_order: Optional[int] = Field(None, description="Sort order value") 
+    sort_order: Optional[int] = Field(None, description="Sort order value")

@@ -1,7 +1,9 @@
 """API exception classes."""
 
+
 class ApiError(Exception):
     """Base exception for API errors."""
+
     def __init__(self, message: str, error_code: str = None, error_id: str = None):
         self.message = message
         self.error_code = error_code
@@ -19,19 +21,23 @@ class ApiError(Exception):
 
 class AuthenticationError(ApiError):
     """Raised when authentication fails."""
+
     pass
 
 
 class NotFoundError(ApiError):
     """Raised when a resource is not found."""
+
     pass
 
 
 class RateLimitError(ApiError):
     """Raised when rate limit is exceeded."""
+
     pass
 
 
 class ValidationError(ApiError):
     """Raised when request validation fails."""
-    pass 
+
+    pass

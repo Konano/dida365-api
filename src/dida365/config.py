@@ -1,4 +1,5 @@
 """Configuration module for Dida365/TickTick API client."""
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
@@ -17,11 +18,11 @@ class ServiceType(str, Enum):
 
 def validate_url(url: str, allow_custom: bool = True) -> bool:
     """Validate URL format.
-    
+
     Args:
         url: URL to validate
         allow_custom: Whether to allow custom domains
-        
+
     Returns:
         bool: True if valid, False otherwise
     """
@@ -29,8 +30,7 @@ def validate_url(url: str, allow_custom: bool = True) -> bool:
         result = urlparse(url)
         valid_scheme = result.scheme in ("http", "https")
         if not allow_custom:
-            valid_domain = result.netloc in ("api.dida365.com", "api.ticktick.com", 
-                                           "dida365.com", "ticktick.com")
+            valid_domain = result.netloc in ("api.dida365.com", "api.ticktick.com", "dida365.com", "ticktick.com")
             return valid_scheme and valid_domain
         return valid_scheme and result.netloc
     except Exception:
@@ -49,7 +49,7 @@ class ApiConfig:
         """Validate configuration after initialization."""
         if self.custom_base_url and not validate_url(self.custom_base_url):
             raise ValidationError(f"Invalid custom base URL: {self.custom_base_url}")
-        
+
         if not self.api_version.startswith("v"):
             logger.warning(f"API version {self.api_version} might be invalid - should start with 'v'")
 
@@ -97,8 +97,8 @@ class ApiConfig:
         # Remove leading slash if present
         endpoint = endpoint.lstrip("/")
         url = f"{self.base_url}/open/{self.api_version}/{endpoint}"
-        
+
         if not validate_url(url, allow_custom=bool(self.custom_base_url)):
             raise ValidationError(f"Invalid API URL generated: {url}")
-            
-        return url 
+
+        return url
