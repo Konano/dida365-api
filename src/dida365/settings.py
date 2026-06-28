@@ -112,9 +112,11 @@ class Settings(BaseSettings):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Configure logging based on settings
+        # Configure logging based on settings.
+        # When debug=True, force log level to DEBUG; otherwise respect log_level.
+        level = "DEBUG" if self.debug else self.log_level.upper()
         setup_logging(
-            level=self.log_level.upper() if self.debug else "INFO",
+            level=level,
             log_format=self.log_format,
             date_format=self.log_date_format,
             log_file=self.log_file,
