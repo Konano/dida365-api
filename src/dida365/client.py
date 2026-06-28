@@ -93,7 +93,9 @@ class Dida365Client:
 
         # Load token: constructor arg takes priority over env var
         token = access_token or settings.access_token
-        if token and self._verify_token_client():
+        # Only verify client_id match when loading from env var;
+        # constructor-provided token skips verification.
+        if token and (access_token or self._verify_token_client()):
             logger.debug("Loading existing token from %s", "constructor" if access_token else "environment")
             self.auth.token = TokenInfo(
                 access_token=token,
