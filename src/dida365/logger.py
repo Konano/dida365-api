@@ -46,5 +46,6 @@ def setup_logging(
             logger.warning(f"Failed to setup file logging to {log_file}: {e}")
 
 
-# Set default logging configuration
-setup_logging()
+# Logging is configured when Settings is instantiated (see settings.py).
+# The module-level setup_logging() call is intentionally omitted to avoid
+# double-initialization — Settings.__init__ is the single point of configuration.
