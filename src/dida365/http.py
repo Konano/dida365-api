@@ -209,9 +209,15 @@ class HttpClient:
         except Exception as e:
             raise ApiError(f"Unexpected error: {str(e)}")
 
-    async def get(self, endpoint: str, *, model: Optional[Type[T]] = None) -> T:
+    async def get(
+        self,
+        endpoint: str,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+        model: Optional[Type[T]] = None,
+    ) -> T:
         """Send GET request."""
-        response = await self._make_request("GET", endpoint, model=model)
+        response = await self._make_request("GET", endpoint, params=params, model=model)
         if response is None:
             raise NotFoundError(f"Resource not found: {endpoint}")
         return response
@@ -236,6 +242,11 @@ class HttpClient:
         """Send PUT request."""
         return await self._make_request("PUT", endpoint, json_data=json_data, model=model)
 
-    async def delete(self, endpoint: str) -> None:
+    async def delete(
+        self,
+        endpoint: str,
+        *,
+        params: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """Send DELETE request."""
-        await self._make_request("DELETE", endpoint)
+        await self._make_request("DELETE", endpoint, params=params)

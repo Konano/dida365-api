@@ -6,6 +6,7 @@ from importlib.metadata import version as _metadata_version
 from .client import Dida365Client
 from .config import ApiConfig, ServiceType
 from .exceptions import ApiError, AuthenticationError, NotFoundError, RateLimitError, ValidationError
+from .models.focus import Focus, FocusCreate, FocusType, PomodoroTaskBrief
 from .models.project import (
     Column,
     ColumnCreate,
@@ -55,6 +56,11 @@ __all__ = [
     "NotFoundError",
     "RateLimitError",
     "ValidationError",
+    # Focus models
+    "Focus",
+    "FocusCreate",
+    "FocusType",
+    "PomodoroTaskBrief",
     # Project models
     "Column",
     "ColumnCreate",

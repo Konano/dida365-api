@@ -9,6 +9,7 @@ from .config import ApiConfig, ServiceType
 from .exceptions import ValidationError
 from .http import HttpClient
 from .logger import logger
+from .models.focus import Focus, FocusCreate, FocusType
 from .models.project import (
     Column,
     ColumnCreate,
@@ -346,6 +347,63 @@ class Dida365Client:
             json_data=tag.model_dump(by_alias=True, exclude_none=True),
             model=Tag,
         )
+
+    # Focus methods
+
+    async def get_focus(self, focus_id: str, focus_type: FocusType) -> Focus:
+        """Get a focus record by ID.
+
+        Args:
+            focus_id: Focus identifier.
+            focus_type: Focus type (Pomodoro=0 or Timing=1).
+
+        Returns:
+            The Focus record.
+        """
+        focus = await self.http.get(f"focus/{focus_id}", params={"type": str(focus_type.value)}, model=Focus)
+        return focus
+
+    async def get_focuses(self, from_date: str, to_date: str, focus_type: FocusType) -> List[Focus]:
+        """Get focus records within a time range.
+
+        Args:
+            from_date: Range start time, e.g. "2026-04-01T00:00:00+0800".
+            to_date: Range end time, e.g. "2026-04-02T00:00:00+0800".
+            focus_type: Focus type (Pomodoro=0 or Timing=1).
+
+        Returns:
+            List of Focus records.
+        """
+        results = await self.http.get(
+            "focus",
+            params={"from": from_date, "to": to_date, "type": str(focus_type.value)},
+            model=List[Focus],
+        )
+        return results
+
+    async def create_focus(self, focus: FocusCreate) -> Optional[Focus]:
+        """Create a new focus record.
+
+        Args:
+            focus: FocusCreate with type, times, and optional task/note.
+
+        Returns:
+            The created Focus.
+        """
+        return await self.http.post(
+            "focus",
+            json_data=focus.model_dump(by_alias=True, exclude_none=True),
+            model=Focus,
+        )
+
+    async def delete_focus(self, focus_id: str, focus_type: FocusType) -> None:
+        """Delete a focus record.
+
+        Args:
+            focus_id: Focus identifier.
+            focus_type: Focus type (Pomodoro=0 or Timing=1).
+        """
+        await self.http.delete(f"focus/{focus_id}", params={"type": str(focus_type.value)})
 
     # Project-related methods
 
