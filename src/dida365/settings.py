@@ -104,12 +104,6 @@ class Settings(BaseSettings):
         default_factory=lambda: RequestTimeoutConfig(**PYPROJECT_SETTINGS.get("request_timeout", {})),
         description="Request timeout settings",
     )
-    max_retries: int = Field(
-        default=PYPROJECT_SETTINGS.get("max_retries", 3),
-        description="Maximum number of request retries",
-        validation_alias=f"{ENV_PREFIX}MAX_RETRIES",
-    )
-
     model_config = {
         "env_file": ".env",
         "case_sensitive": True,

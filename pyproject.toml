@@ -5,13 +5,14 @@ build-backend = "hatchling.build"
 [project]
 name = "dida365"
 version = "0.1.10"
-description = "Unofficial Python client for Dida365/TickTick API - Community-maintained package for task automation"
+description = "Python client for Dida365/TickTick API"
 readme = "README.md"
 requires-python = ">=3.8"
 authors = [
-    { name = "Carter Yifeng Cheng", email = "cyfine@github.com" }
+    { name = "Carter Yifeng Cheng", email = "cyfine@github.com" },
+    { name = "Konano", email = "nanoapezlk@gmail.com" },
 ]
-keywords = ["dida365", "ticktick", "task-management", "automation", "unofficial-api"]
+keywords = ["dida365", "ticktick", "task-management"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -23,6 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Office/Business :: Scheduling",
 ]
@@ -49,7 +51,7 @@ dev = [
 packages = ["src/dida365"]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py38"
 
 [tool.ruff.lint]
@@ -81,9 +83,6 @@ connect = 10.0  # Connection timeout
 read = 30.0     # Read timeout
 write = 30.0    # Write timeout
 pool = 5.0      # Pool timeout
-
-# Request configuration
-max_retries = 3  # Maximum number of retries for failed requests
 
 [project.urls]
 Homepage = "https://github.com/Cyfine/TickTick-Dida365-API-Client"

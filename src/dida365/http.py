@@ -46,17 +46,15 @@ def retry_on_rate_limit(func):
 
 
 class HttpClient:
-    def __init__(self, config: ApiConfig, timeout: Optional[Timeout] = None, max_retries: int = 3):
+    def __init__(self, config: ApiConfig, timeout: Optional[Timeout] = None):
         """Initialize the HTTP client.
 
         Args:
             config: API configuration
             timeout: Optional custom timeout settings
-            max_retries: Maximum number of retries for failed requests
         """
         self.config = config
         self.timeout = timeout or DEFAULT_TIMEOUT
-        self.max_retries = max_retries
 
         # Initialize session with proper settings
         self._session = httpx.AsyncClient(timeout=self.timeout, headers=DEFAULT_HEADERS.copy(), follow_redirects=True)
