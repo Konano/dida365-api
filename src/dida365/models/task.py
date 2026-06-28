@@ -21,6 +21,7 @@ class TaskPriority(IntEnum):
 class TaskStatus(IntEnum):
     """Task status values."""
 
+    ABANDONED = -1  # Not mentioned in the API docs, but observed in practice
     NORMAL = 0
     COMPLETED = 2
 
