@@ -35,6 +35,9 @@ DEFAULT_TIMEOUT = Timeout(
 def retry_on_rate_limit(func):
     """Decorator to retry requests when rate limit is hit."""
 
+    # TODO: Implement actual retry logic with exponential backoff.
+    # Currently a no-op — the wrapper just passes through to the original function.
+    # RateLimitError is caught and raised by _handle_error_response, but never retried.
     @wraps(func)
     async def wrapper(*args, **kwargs):
         return await func(*args, **kwargs)
