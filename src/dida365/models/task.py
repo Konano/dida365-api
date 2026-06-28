@@ -171,7 +171,7 @@ class TaskFilterRequest(BaseApiModel):
             start_date=datetime(2026, 3, 1, tzinfo=timezone.utc),
             end_date=datetime(2026, 3, 5, tzinfo=timezone.utc),
             priority=[TaskPriority.NONE],
-            tags=["urgent"],
+            tag=["urgent"],
             status=[TaskStatus.NORMAL],
         )
         ```
@@ -181,7 +181,7 @@ class TaskFilterRequest(BaseApiModel):
     start_date: Optional[datetime] = Field(default=None, description="Start time range (inclusive)")
     end_date: Optional[datetime] = Field(default=None, description="End time range (inclusive)")
     priority: Optional[List[TaskPriority]] = Field(default=None, description="Filter by priority levels")
-    tags: Optional[List[str]] = Field(default=None, description="Filter by tags (all must match)")
+    tag: Optional[List[str]] = Field(default=None, description="Filter by tags (all must match)")
     status: Optional[List[TaskStatus]] = Field(default=None, description="Filter by status codes")
 
     @field_serializer("start_date", "end_date")

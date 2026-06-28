@@ -255,7 +255,7 @@ class Dida365Client:
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         priority: Optional[List[TaskPriority]] = None,
-        tags: Optional[List[str]] = None,
+        tag: Optional[List[str]] = None,
         status: Optional[List[TaskStatus]] = None,
     ) -> List[Task]:
         """Filter tasks with advanced criteria.
@@ -265,7 +265,7 @@ class Dida365Client:
             start_date: Filters tasks where startDate ≥ value.
             end_date: Filters tasks where startDate ≤ value.
             priority: Filter by priority levels (None=0, Low=1, Medium=3, High=5).
-            tags: Filter by tags (all specified tags must match).
+            tag: Filter by tags (all specified tags must match).
             status: Filter by status codes (Normal=0, Completed=2).
 
         Returns:
@@ -276,7 +276,7 @@ class Dida365Client:
             start_date=start_date,
             end_date=end_date,
             priority=priority,
-            tags=tags,
+            tag=tag,
             status=status,
         )
         results = await self.http.post(
