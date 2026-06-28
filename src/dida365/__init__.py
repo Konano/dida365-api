@@ -16,6 +16,7 @@ from .models.project import (
     ProjectUpdate,
     ViewMode,
 )
+from .models.project_group import ProjectGroup, ProjectGroupCreate, ProjectGroupUpdate
 from .models.task import (
     ChecklistItem,
     Comment,
@@ -57,6 +58,10 @@ __all__ = [
     "ProjectPermission",
     "ProjectUpdate",
     "ViewMode",
+    # Project Group models
+    "ProjectGroup",
+    "ProjectGroupCreate",
+    "ProjectGroupUpdate",
     # Task models
     "ChecklistItem",
     "CommentCreate",

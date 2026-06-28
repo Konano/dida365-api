@@ -10,6 +10,7 @@ from .exceptions import ValidationError
 from .http import HttpClient
 from .logger import logger
 from .models.project import Project, ProjectCreate, ProjectData, ProjectUpdate
+from .models.project_group import ProjectGroup, ProjectGroupCreate, ProjectGroupUpdate
 from .models.task import (
     Comment,
     CommentCreate,
@@ -345,6 +346,56 @@ class Dida365Client:
     async def delete_project(self, project_id: str) -> None:
         """Delete a project."""
         await self.http.delete(f"project/{project_id}")
+
+    # Project Group methods
+
+    async def get_project_groups(self) -> List[ProjectGroup]:
+        """Get all project groups.
+
+        Returns:
+            List of ProjectGroup objects.
+        """
+        groups = await self.http.get("project/group", model=List[ProjectGroup])
+        return groups
+
+    async def create_project_group(self, group: ProjectGroupCreate) -> Optional[ProjectGroup]:
+        """Create a new project group.
+
+        Args:
+            group: ProjectGroupCreate with the group name.
+
+        Returns:
+            The created ProjectGroup.
+        """
+        return await self.http.post(
+            "project/group",
+            json_data=group.model_dump(by_alias=True, exclude_none=True),
+            model=ProjectGroup,
+        )
+
+    async def update_project_group(self, group_id: str, group: ProjectGroupUpdate) -> Optional[ProjectGroup]:
+        """Update an existing project group.
+
+        Args:
+            group_id: Project group identifier.
+            group: ProjectGroupUpdate with fields to update.
+
+        Returns:
+            The updated ProjectGroup.
+        """
+        return await self.http.post(
+            f"project/group/{group_id}",
+            json_data=group.model_dump(by_alias=True, exclude_none=True),
+            model=ProjectGroup,
+        )
+
+    async def delete_project_group(self, group_id: str) -> None:
+        """Delete a project group.
+
+        Args:
+            group_id: Project group identifier.
+        """
+        await self.http.delete(f"project/group/{group_id}")
 
     # Authentication methods
 
