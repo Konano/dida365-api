@@ -25,6 +25,14 @@ class TaskStatus(IntEnum):
     COMPLETED = 2
 
 
+class TaskKind(str):
+    """Task kind constants."""
+
+    TEXT = "TEXT"
+    NOTE = "NOTE"
+    CHECKLIST = "CHECKLIST"
+
+
 class ChecklistItemStatus(IntEnum):
     """Checklist item status values."""
 
@@ -55,6 +63,7 @@ class TaskBase(BaseApiModel, SortableMixin):
     due_date: Optional[datetime] = Field(None, description="Due date and time")
     time_zone: Optional[str] = Field(None, description="Time zone")
     reminders: List[str] = Field(default_factory=list, description="List of reminder triggers")
+    tags: List[str] = Field(default_factory=list, description="Task tags")
     repeat_flag: Optional[str] = Field(None, description="Recurring rules")
     priority: TaskPriority = Field(default=TaskPriority.NONE, description="Task priority")
     items: List[ChecklistItem] = Field(default_factory=list, description="List of checklist items")
@@ -117,3 +126,127 @@ class Task(TaskBase, TimestampMixin):
     title: str = Field(..., description="Task title")  # Override to make required
     status: TaskStatus = Field(default=TaskStatus.NORMAL, description="Task status")
     completed_time: Optional[datetime] = Field(None, description="Completion timestamp")
+    kind: Optional[str] = Field(None, description="Task kind: TEXT, NOTE, or CHECKLIST")
+    etag: Optional[str] = Field(None, description="Entity tag")
+
+
+# ---- Task Move ----
+
+
+class TaskMoveItem(BaseApiModel):
+    """Request model for moving a single task.
+
+    Example:
+        ```python
+        item = TaskMoveItem(
+            from_project_id="project-1",
+            to_project_id="project-2",
+            task_id="task-1",
+        )
+        ```
+    """
+
+    from_project_id: str = Field(..., description="Source project identifier")
+    to_project_id: str = Field(..., description="Destination project identifier")
+    task_id: str = Field(..., description="Task identifier")
+
+
+class TaskMoveResult(BaseApiModel):
+    """Response model for a move operation."""
+
+    id: str = Field(..., description="Task identifier")
+    etag: str = Field(..., description="New entity tag")
+
+
+# ---- Task Filter / Completed ----
+
+
+class TaskFilterRequest(BaseApiModel):
+    """Request model for filtering tasks.
+
+    Example:
+        ```python
+        filter_req = TaskFilterRequest(
+            project_ids=["project-1"],
+            start_date=datetime(2026, 3, 1, tzinfo=timezone.utc),
+            end_date=datetime(2026, 3, 5, tzinfo=timezone.utc),
+            priority=[TaskPriority.NONE],
+            tags=["urgent"],
+            status=[TaskStatus.NORMAL],
+        )
+        ```
+    """
+
+    project_ids: Optional[List[str]] = Field(None, description="Filter by project IDs")
+    start_date: Optional[datetime] = Field(None, description="Start time range (inclusive)")
+    end_date: Optional[datetime] = Field(None, description="End time range (inclusive)")
+    priority: Optional[List[TaskPriority]] = Field(None, description="Filter by priority levels")
+    tags: Optional[List[str]] = Field(None, description="Filter by tags (all must match)")
+    status: Optional[List[TaskStatus]] = Field(None, description="Filter by status codes")
+
+    @field_serializer("start_date", "end_date")
+    def serialize_datetime(self, dt: Optional[datetime], _info) -> Optional[str]:
+        if dt is None:
+            return None
+        return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000+0000")
+
+    @field_serializer("priority")
+    def serialize_priority(self, priorities: Optional[List[TaskPriority]], _info) -> Optional[List[int]]:
+        if priorities is None:
+            return None
+        return [int(p) for p in priorities]
+
+    @field_serializer("status")
+    def serialize_status(self, statuses: Optional[List[TaskStatus]], _info) -> Optional[List[int]]:
+        if statuses is None:
+            return None
+        return [int(s) for s in statuses]
+
+
+class TaskCompletedRequest(BaseApiModel):
+    """Request model for listing completed tasks.
+
+    Example:
+        ```python
+        req = TaskCompletedRequest(
+            project_ids=["project-1"],
+            start_date=datetime(2026, 3, 1, tzinfo=timezone.utc),
+            end_date=datetime(2026, 3, 5, tzinfo=timezone.utc),
+        )
+        ```
+    """
+
+    project_ids: Optional[List[str]] = Field(None, description="Filter by project IDs")
+    start_date: Optional[datetime] = Field(None, description="Start time range (inclusive)")
+    end_date: Optional[datetime] = Field(None, description="End time range (inclusive)")
+
+    @field_serializer("start_date", "end_date")
+    def serialize_datetime(self, dt: Optional[datetime], _info) -> Optional[str]:
+        if dt is None:
+            return None
+        return dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000+0000")
+
+
+# ---- Task Comments ----
+
+
+class CommentCreate(BaseApiModel):
+    """Request model for adding a comment to a task.
+
+    Example:
+        ```python
+        comment = CommentCreate(title="This is a comment")
+        ```
+    """
+
+    title: str = Field(..., description="Comment text")
+
+
+class Comment(BaseApiModel, TimestampMixin):
+    """Response model for a task comment."""
+
+    id: str = Field(..., description="Comment identifier")
+    user_id: Optional[int] = Field(None, description="User id")
+    title: str = Field(..., description="Comment text")
+    reply_comment_id: Optional[str] = Field(None, description="Reply comment identifier")
+    reply_user_id: Optional[int] = Field(None, description="Reply user id")

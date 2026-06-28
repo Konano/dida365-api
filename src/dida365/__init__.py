@@ -1,6 +1,7 @@
 """Dida365/TickTick API client package."""
 
-from importlib.metadata import PackageNotFoundError, version as _metadata_version
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as _metadata_version
 
 from .client import Dida365Client
 from .config import ApiConfig, ServiceType
@@ -17,8 +18,15 @@ from .models.project import (
 )
 from .models.task import (
     ChecklistItem,
+    Comment,
+    CommentCreate,
     Task,
+    TaskCompletedRequest,
     TaskCreate,
+    TaskFilterRequest,
+    TaskKind,
+    TaskMoveItem,
+    TaskMoveResult,
     TaskPriority,
     TaskStatus,
     TaskUpdate,
@@ -51,8 +59,15 @@ __all__ = [
     "ViewMode",
     # Task models
     "ChecklistItem",
+    "CommentCreate",
+    "Comment",
     "Task",
+    "TaskCompletedRequest",
     "TaskCreate",
+    "TaskFilterRequest",
+    "TaskKind",
+    "TaskMoveItem",
+    "TaskMoveResult",
     "TaskPriority",
     "TaskStatus",
     "TaskUpdate",

@@ -1,5 +1,6 @@
 """Main client module for the API."""
 
+from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
@@ -9,7 +10,19 @@ from .exceptions import ValidationError
 from .http import HttpClient
 from .logger import logger
 from .models.project import Project, ProjectCreate, ProjectData, ProjectUpdate
-from .models.task import Task, TaskCreate, TaskUpdate
+from .models.task import (
+    Comment,
+    CommentCreate,
+    Task,
+    TaskCompletedRequest,
+    TaskCreate,
+    TaskFilterRequest,
+    TaskMoveItem,
+    TaskMoveResult,
+    TaskPriority,
+    TaskStatus,
+    TaskUpdate,
+)
 from .settings import settings
 
 
@@ -169,6 +182,131 @@ class Dida365Client:
     async def delete_task(self, project_id: str, task_id: str) -> None:
         """Delete a task."""
         await self.http.delete(f"project/{project_id}/task/{task_id}")
+
+    async def move_task(self, items: List[TaskMoveItem]) -> List[TaskMoveResult]:
+        """Move one or more tasks between projects.
+
+        Args:
+            items: List of TaskMoveItem specifying tasks to move.
+
+        Returns:
+            List of TaskMoveResult with task ID and new etag.
+        """
+        results = await self.http.post(
+            "task/move",
+            json_data=[item.model_dump(by_alias=True, exclude_none=True) for item in items],
+            model=List[TaskMoveResult],
+        )
+        return results or []
+
+    async def get_completed_tasks(
+        self,
+        project_ids: Optional[List[str]] = None,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+    ) -> List[Task]:
+        """Get tasks marked as completed within a given time range.
+
+        Args:
+            project_ids: Optional list of project identifiers to filter by.
+            start_date: Start time range (inclusive). Filters where completedTime ≥ startDate.
+            end_date: End time range (inclusive). Filters where completedTime ≤ endDate.
+
+        Returns:
+            List of completed Task objects.
+        """
+        request = TaskCompletedRequest(
+            project_ids=project_ids,
+            start_date=start_date,
+            end_date=end_date,
+        )
+        results = await self.http.post(
+            "task/completed",
+            json_data=request.model_dump(by_alias=True, exclude_none=True),
+            model=List[Task],
+        )
+        return results or []
+
+    async def filter_tasks(
+        self,
+        project_ids: Optional[List[str]] = None,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        priority: Optional[List[TaskPriority]] = None,
+        tags: Optional[List[str]] = None,
+        status: Optional[List[TaskStatus]] = None,
+    ) -> List[Task]:
+        """Filter tasks with advanced criteria.
+
+        Args:
+            project_ids: Filter by project IDs.
+            start_date: Filters tasks where startDate ≥ value.
+            end_date: Filters tasks where startDate ≤ value.
+            priority: Filter by priority levels (None=0, Low=1, Medium=3, High=5).
+            tags: Filter by tags (all specified tags must match).
+            status: Filter by status codes (Normal=0, Completed=2).
+
+        Returns:
+            List of matching Task objects.
+        """
+        request = TaskFilterRequest(
+            project_ids=project_ids,
+            start_date=start_date,
+            end_date=end_date,
+            priority=priority,
+            tags=tags,
+            status=status,
+        )
+        results = await self.http.post(
+            "task/filter",
+            json_data=request.model_dump(by_alias=True, exclude_none=True),
+            model=List[Task],
+        )
+        return results or []
+
+    async def get_task_comments(self, project_id: str, task_id: str) -> List[Comment]:
+        """Get comments for a task.
+
+        Args:
+            project_id: Project identifier.
+            task_id: Task identifier.
+
+        Returns:
+            List of Comment objects.
+        """
+        results = await self.http.get(
+            f"project/{project_id}/task/{task_id}/comments",
+            model=List[Comment],
+        )
+        return results
+
+    async def add_task_comment(self, project_id: str, task_id: str, title: str) -> Optional[Comment]:
+        """Add a comment to a task.
+
+        Args:
+            project_id: Project identifier.
+            task_id: Task identifier.
+            title: Comment text.
+
+        Returns:
+            The created Comment.
+        """
+        comment = CommentCreate(title=title)
+        return await self.http.post(
+            f"project/{project_id}/task/{task_id}/comment",
+            json_data=comment.model_dump(by_alias=True, exclude_none=True),
+            model=Comment,
+        )
+
+    async def delete_task_comment(self, project_id: str, task_id: str, comment_id: str) -> None:
+        """Delete a comment from a task.
+
+        Args:
+            project_id: Project identifier.
+            task_id: Task identifier.
+            comment_id: Comment identifier.
+        """
+        await self.http.delete(f"project/{project_id}/task/{task_id}/comment/{comment_id}")
 
     # Project-related methods
 

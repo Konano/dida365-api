@@ -2,7 +2,7 @@
 
 import json
 from functools import wraps
-from typing import Any, Dict, NoReturn, Optional, Type, TypeVar, get_args, get_origin
+from typing import Any, Dict, List, NoReturn, Optional, Type, TypeAlias, TypeVar, Union, get_args, get_origin
 
 import httpx
 from httpx import Timeout
@@ -12,6 +12,8 @@ from .exceptions import ApiError, AuthenticationError, NotFoundError, RateLimitE
 from .logger import logger
 
 T = TypeVar("T")
+
+JSONBody: TypeAlias = Union[Dict[str, Any], List[Dict[str, Any]], None]
 
 # The exact headers that work with the API
 DEFAULT_HEADERS = {
@@ -78,7 +80,13 @@ class HttpClient:
             headers["Authorization"] = f"Bearer {self.token}"
         return headers
 
-    def _log_request(self, url: str, method: str, headers: Dict[str, str], json_data: Optional[Dict] = None):
+    def _log_request(
+        self,
+        url: str,
+        method: str,
+        headers: Dict[str, str],
+        json_data: JSONBody = None,
+    ):
         """Log request details for debugging."""
         logger.debug("API Request Details:")
         logger.debug(f"URL: {url}")
@@ -138,7 +146,7 @@ class HttpClient:
         endpoint: str,
         *,
         params: Optional[Dict[str, Any]] = None,
-        json_data: Optional[Dict[str, Any]] = None,
+        json_data: JSONBody = None,
         model: Optional[Type[T]] = None,
     ) -> Optional[T]:
         """
@@ -212,7 +220,7 @@ class HttpClient:
         self,
         endpoint: str,
         *,
-        json_data: Optional[Dict[str, Any]] = None,
+        json_data: JSONBody = None,
         model: Optional[Type[T]] = None,
     ) -> Optional[T]:
         """Send POST request."""
@@ -222,7 +230,7 @@ class HttpClient:
         self,
         endpoint: str,
         *,
-        json_data: Optional[Dict[str, Any]] = None,
+        json_data: JSONBody = None,
         model: Optional[Type[T]] = None,
     ) -> Optional[T]:
         """Send PUT request."""
