@@ -1,7 +1,7 @@
 """Main client module for the API."""
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from .auth import OAuth2Manager, TokenInfo
 from .config import ApiConfig, ServiceType
@@ -51,7 +51,6 @@ class Dida365Client:
             client_id=self.client_id, client_secret=self.client_secret, config=self.config, redirect_uri=redirect_uri
         )
         self.http = HttpClient(config=self.config)
-        self.state: Dict[str, List[Any]] = {"tasks": [], "projects": [], "tags": [], "project_folders": []}
 
         # Load token from env if available and matches current client
         if settings.access_token and self._verify_token_client():
@@ -152,8 +151,6 @@ class Dida365Client:
             json_data=task.model_dump(by_alias=True, exclude_none=True),
             model=Task,
         )
-        if created_task:
-            self.state["tasks"].append(created_task.model_dump())
         return created_task
 
     async def update_task(self, task: TaskUpdate) -> Optional[Task]:
@@ -163,36 +160,21 @@ class Dida365Client:
             json_data=task.model_dump(by_alias=True, exclude_none=True),
             model=Task,
         )
-        if updated_task:
-            # Update state
-            for i, t in enumerate(self.state["tasks"]):
-                if t["id"] == task.id:
-                    self.state["tasks"][i] = updated_task.model_dump()
-                    break
         return updated_task
 
     async def complete_task(self, project_id: str, task_id: str) -> None:
         """Mark a task as completed."""
         await self.http.post(f"project/{project_id}/task/{task_id}/complete")
-        # Update state
-        for task in self.state["tasks"]:
-            if task["id"] == task_id:
-                task["status"] = 2  # Completed status
-                break
 
     async def delete_task(self, project_id: str, task_id: str) -> None:
         """Delete a task."""
         await self.http.delete(f"project/{project_id}/task/{task_id}")
-        # Update state
-        self.state["tasks"] = [t for t in self.state["tasks"] if t["id"] != task_id]
 
     # Project-related methods
 
     async def get_projects(self) -> List[Project]:
         """Get all projects."""
         projects = await self.http.get("project", model=List[Project])
-        if projects:
-            self.state["projects"] = [p.model_dump() for p in projects]
         return projects
 
     async def get_project(self, project_id: str) -> Project:
@@ -202,16 +184,6 @@ class Dida365Client:
     async def get_project_with_data(self, project_id: str) -> ProjectData:
         """Get a project with its tasks and columns."""
         data = await self.http.get(f"project/{project_id}/data", model=ProjectData)
-        if data:
-            # Update state with project tasks
-            for task in data.tasks:
-                task_dict = task.model_dump()
-                for i, t in enumerate(self.state["tasks"]):
-                    if t["id"] == task.id:
-                        self.state["tasks"][i] = task_dict
-                        break
-                else:
-                    self.state["tasks"].append(task_dict)
         return data
 
     async def create_project(self, project: ProjectCreate) -> Optional[Project]:
@@ -221,8 +193,6 @@ class Dida365Client:
             json_data=project.model_dump(by_alias=True, exclude_none=True),
             model=Project,
         )
-        if created_project:
-            self.state["projects"].append(created_project.model_dump())
         return created_project
 
     async def update_project(self, project: ProjectUpdate) -> Optional[Project]:
@@ -232,19 +202,11 @@ class Dida365Client:
             json_data=project.model_dump(by_alias=True, exclude_none=True),
             model=Project,
         )
-        if updated_project:
-            # Update state
-            for i, p in enumerate(self.state["projects"]):
-                if p["id"] == project.id:
-                    self.state["projects"][i] = updated_project.model_dump()
-                    break
         return updated_project
 
     async def delete_project(self, project_id: str) -> None:
         """Delete a project."""
         await self.http.delete(f"project/{project_id}")
-        # Update state
-        self.state["projects"] = [p for p in self.state["projects"] if p["id"] != project_id]
 
     # Authentication methods
 
