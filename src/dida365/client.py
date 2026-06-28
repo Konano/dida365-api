@@ -9,8 +9,18 @@ from .config import ApiConfig, ServiceType
 from .exceptions import ValidationError
 from .http import HttpClient
 from .logger import logger
-from .models.project import Column, ColumnCreate, ColumnUpdate, Project, ProjectCreate, ProjectData, ProjectUpdate
-from .models.project_group import ProjectGroup, ProjectGroupCreate, ProjectGroupUpdate
+from .models.project import (
+    Column,
+    ColumnCreate,
+    ColumnUpdate,
+    Project,
+    ProjectCreate,
+    ProjectData,
+    ProjectGroup,
+    ProjectGroupCreate,
+    ProjectGroupUpdate,
+    ProjectUpdate,
+)
 from .models.task import (
     Comment,
     CommentCreate,

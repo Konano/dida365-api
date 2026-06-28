@@ -8,6 +8,23 @@ from pydantic import Field, field_validator
 from .base import BaseApiModel, SortableMixin, TimestampMixin
 from .task import Task
 
+__all__ = [
+    "Column",
+    "ColumnCreate",
+    "ColumnUpdate",
+    "Project",
+    "ProjectBase",
+    "ProjectCreate",
+    "ProjectData",
+    "ProjectGroup",
+    "ProjectGroupCreate",
+    "ProjectGroupUpdate",
+    "ProjectKind",
+    "ProjectPermission",
+    "ProjectUpdate",
+    "ViewMode",
+]
+
 
 class ViewMode(str, Enum):
     """Project view mode options.
@@ -202,3 +219,47 @@ class ColumnUpdate(BaseApiModel):
     """
 
     name: Optional[str] = Field(None, description="Column name (max 1000 characters)")
+
+
+class ProjectGroup(BaseApiModel, SortableMixin):
+    """Model for a project group.
+
+    Example:
+        ```python
+        group = ProjectGroup(
+            id="group-1",
+            name="Work",
+            show_all=True,
+            view_mode="list",
+        )
+        ```
+    """
+
+    id: str = Field(..., description="Project group identifier")
+    name: str = Field(..., description="Project group name")
+    show_all: bool = Field(default=True, description="Whether to show all projects in the group")
+    view_mode: Optional[str] = Field(default="list", description="View mode: list, kanban, or timeline")
+
+
+class ProjectGroupCreate(BaseApiModel):
+    """Model for creating a new project group.
+
+    Example:
+        ```python
+        group = ProjectGroupCreate(name="Work")
+        ```
+    """
+
+    name: str = Field(..., description="Project group name (max 64 characters)")
+
+
+class ProjectGroupUpdate(BaseApiModel):
+    """Model for updating an existing project group.
+
+    Example:
+        ```python
+        update = ProjectGroupUpdate(name="New Name")
+        ```
+    """
+
+    name: Optional[str] = Field(None, description="Project group name (max 64 characters)")

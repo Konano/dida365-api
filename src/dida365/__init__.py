@@ -13,12 +13,14 @@ from .models.project import (
     Project,
     ProjectCreate,
     ProjectData,
+    ProjectGroup,
+    ProjectGroupCreate,
+    ProjectGroupUpdate,
     ProjectKind,
     ProjectPermission,
     ProjectUpdate,
     ViewMode,
 )
-from .models.project_group import ProjectGroup, ProjectGroupCreate, ProjectGroupUpdate
 from .models.task import (
     ChecklistItem,
     Comment,
