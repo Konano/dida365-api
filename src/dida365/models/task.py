@@ -47,7 +47,7 @@ class ChecklistItem(BaseApiModel, SortableMixin):
     title: str = Field(..., description="Checklist item title")
     status: ChecklistItemStatus = Field(default=ChecklistItemStatus.NORMAL, description="Completion status")
     completed_time: Optional[datetime] = Field(default=None, description="Completion timestamp")
-    is_all_day: bool = Field(default=False, description="Whether the item is all-day")
+    is_all_day: bool = Field(default=True, description="Whether the item is all-day")
     start_date: Optional[datetime] = Field(default=None, description="Start date and time")
     time_zone: Optional[str] = Field(default=None, description="Time zone")
 
@@ -58,7 +58,7 @@ class TaskBase(BaseApiModel, SortableMixin):
     title: Optional[str] = Field(default=None, description="Task title")
     content: Optional[str] = Field(default=None, description="Task content")
     desc: Optional[str] = Field(default=None, description="Task description")
-    is_all_day: bool = Field(default=False, description="Whether the task is all-day")
+    is_all_day: bool = Field(default=True, description="Whether the task is all-day")
     start_date: Optional[datetime] = Field(default=None, description="Start date and time")
     due_date: Optional[datetime] = Field(default=None, description="Due date and time")
     time_zone: Optional[str] = Field(default=None, description="Time zone")
