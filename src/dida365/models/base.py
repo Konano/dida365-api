@@ -18,11 +18,11 @@ class BaseApiModel(BaseModel):
 class TimestampMixin(BaseModel):
     """Mixin for models with timestamp fields."""
 
-    created_time: Optional[datetime] = Field(None, description="Creation timestamp")
-    modified_time: Optional[datetime] = Field(None, description="Last modification timestamp")
+    created_time: Optional[datetime] = Field(default=None, description="Creation timestamp")
+    modified_time: Optional[datetime] = Field(default=None, description="Last modification timestamp")
 
 
 class SortableMixin(BaseModel):
     """Mixin for models with sort order."""
 
-    sort_order: Optional[int] = Field(None, description="Sort order value")
+    sort_order: Optional[int] = Field(default=None, description="Sort order value")

@@ -43,28 +43,28 @@ class ChecklistItemStatus(IntEnum):
 class ChecklistItem(BaseApiModel, SortableMixin):
     """Model for a checklist item (subtask)."""
 
-    id: Optional[str] = Field(None, description="Checklist item identifier")
+    id: Optional[str] = Field(default=None, description="Checklist item identifier")
     title: str = Field(..., description="Checklist item title")
     status: ChecklistItemStatus = Field(default=ChecklistItemStatus.NORMAL, description="Completion status")
-    completed_time: Optional[datetime] = Field(None, description="Completion timestamp")
+    completed_time: Optional[datetime] = Field(default=None, description="Completion timestamp")
     is_all_day: bool = Field(default=False, description="Whether the item is all-day")
-    start_date: Optional[datetime] = Field(None, description="Start date and time")
-    time_zone: Optional[str] = Field(None, description="Time zone")
+    start_date: Optional[datetime] = Field(default=None, description="Start date and time")
+    time_zone: Optional[str] = Field(default=None, description="Time zone")
 
 
 class TaskBase(BaseApiModel, SortableMixin):
     """Base model for task data."""
 
-    title: Optional[str] = Field(None, description="Task title")
-    content: Optional[str] = Field(None, description="Task content")
-    desc: Optional[str] = Field(None, description="Task description")
+    title: Optional[str] = Field(default=None, description="Task title")
+    content: Optional[str] = Field(default=None, description="Task content")
+    desc: Optional[str] = Field(default=None, description="Task description")
     is_all_day: bool = Field(default=False, description="Whether the task is all-day")
-    start_date: Optional[datetime] = Field(None, description="Start date and time")
-    due_date: Optional[datetime] = Field(None, description="Due date and time")
-    time_zone: Optional[str] = Field(None, description="Time zone")
+    start_date: Optional[datetime] = Field(default=None, description="Start date and time")
+    due_date: Optional[datetime] = Field(default=None, description="Due date and time")
+    time_zone: Optional[str] = Field(default=None, description="Time zone")
     reminders: List[str] = Field(default_factory=list, description="List of reminder triggers")
     tags: List[str] = Field(default_factory=list, description="Task tags")
-    repeat_flag: Optional[str] = Field(None, description="Recurring rules")
+    repeat_flag: Optional[str] = Field(default=None, description="Recurring rules")
     priority: TaskPriority = Field(default=TaskPriority.NONE, description="Task priority")
     items: List[ChecklistItem] = Field(default_factory=list, description="List of checklist items")
 
@@ -125,9 +125,9 @@ class Task(TaskBase, TimestampMixin):
     project_id: str = Field(..., description="Project identifier")
     title: str = Field(..., description="Task title")  # Override to make required
     status: TaskStatus = Field(default=TaskStatus.NORMAL, description="Task status")
-    completed_time: Optional[datetime] = Field(None, description="Completion timestamp")
-    kind: Optional[str] = Field(None, description="Task kind: TEXT, NOTE, or CHECKLIST")
-    etag: Optional[str] = Field(None, description="Entity tag")
+    completed_time: Optional[datetime] = Field(default=None, description="Completion timestamp")
+    kind: Optional[str] = Field(default=None, description="Task kind: TEXT, NOTE, or CHECKLIST")
+    etag: Optional[str] = Field(default=None, description="Entity tag")
 
 
 # ---- Task Move ----
@@ -177,12 +177,12 @@ class TaskFilterRequest(BaseApiModel):
         ```
     """
 
-    project_ids: Optional[List[str]] = Field(None, description="Filter by project IDs")
-    start_date: Optional[datetime] = Field(None, description="Start time range (inclusive)")
-    end_date: Optional[datetime] = Field(None, description="End time range (inclusive)")
-    priority: Optional[List[TaskPriority]] = Field(None, description="Filter by priority levels")
-    tags: Optional[List[str]] = Field(None, description="Filter by tags (all must match)")
-    status: Optional[List[TaskStatus]] = Field(None, description="Filter by status codes")
+    project_ids: Optional[List[str]] = Field(default=None, description="Filter by project IDs")
+    start_date: Optional[datetime] = Field(default=None, description="Start time range (inclusive)")
+    end_date: Optional[datetime] = Field(default=None, description="End time range (inclusive)")
+    priority: Optional[List[TaskPriority]] = Field(default=None, description="Filter by priority levels")
+    tags: Optional[List[str]] = Field(default=None, description="Filter by tags (all must match)")
+    status: Optional[List[TaskStatus]] = Field(default=None, description="Filter by status codes")
 
     @field_serializer("start_date", "end_date")
     def serialize_datetime(self, dt: Optional[datetime], _info) -> Optional[str]:
@@ -216,9 +216,9 @@ class TaskCompletedRequest(BaseApiModel):
         ```
     """
 
-    project_ids: Optional[List[str]] = Field(None, description="Filter by project IDs")
-    start_date: Optional[datetime] = Field(None, description="Start time range (inclusive)")
-    end_date: Optional[datetime] = Field(None, description="End time range (inclusive)")
+    project_ids: Optional[List[str]] = Field(default=None, description="Filter by project IDs")
+    start_date: Optional[datetime] = Field(default=None, description="Start time range (inclusive)")
+    end_date: Optional[datetime] = Field(default=None, description="End time range (inclusive)")
 
     @field_serializer("start_date", "end_date")
     def serialize_datetime(self, dt: Optional[datetime], _info) -> Optional[str]:
@@ -246,10 +246,10 @@ class Comment(BaseApiModel, TimestampMixin):
     """Response model for a task comment."""
 
     id: str = Field(..., description="Comment identifier")
-    user_id: Optional[int] = Field(None, description="User id")
+    user_id: Optional[int] = Field(default=None, description="User id")
     title: str = Field(..., description="Comment text")
-    reply_comment_id: Optional[str] = Field(None, description="Reply comment identifier")
-    reply_user_id: Optional[int] = Field(None, description="Reply user id")
+    reply_comment_id: Optional[str] = Field(default=None, description="Reply comment identifier")
+    reply_user_id: Optional[int] = Field(default=None, description="Reply user id")
 
 
 # ---- Tag ----
@@ -266,8 +266,8 @@ class Tag(BaseApiModel, SortableMixin):
 
     name: str = Field(..., description="Tag name")
     label: str = Field(..., description="Tag label")
-    color: Optional[str] = Field(None, description="Tag color")
-    parent: Optional[str] = Field(None, description="Parent tag name")
+    color: Optional[str] = Field(default=None, description="Tag color")
+    parent: Optional[str] = Field(default=None, description="Parent tag name")
     type: int = Field(default=1, description="Tag type: Personal=1, Team=2")
 
 

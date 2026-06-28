@@ -21,31 +21,31 @@ class PomodoroTaskBrief(BaseApiModel):
 
     task_id: str = Field(..., description="Task id")
     title: str = Field(..., description="Task title")
-    habit_id: Optional[str] = Field(None, description="Habit id")
-    timer_id: Optional[str] = Field(None, description="Timer id")
-    timer_name: Optional[str] = Field(None, description="Timer name")
-    start_time: Optional[datetime] = Field(None, description="Task focus start time")
-    end_time: Optional[datetime] = Field(None, description="Task focus end time")
+    habit_id: Optional[str] = Field(default=None, description="Habit id")
+    timer_id: Optional[str] = Field(default=None, description="Timer id")
+    timer_name: Optional[str] = Field(default=None, description="Timer name")
+    start_time: Optional[datetime] = Field(default=None, description="Task focus start time")
+    end_time: Optional[datetime] = Field(default=None, description="Task focus end time")
 
 
 class Focus(BaseApiModel, TimestampMixin):
     """Model for a focus (Pomodoro/Timing) record."""
 
     id: str = Field(..., description="Focus unique id")
-    user_id: Optional[int] = Field(None, description="User id")
+    user_id: Optional[int] = Field(default=None, description="User id")
     type: FocusType = Field(..., description="Focus type: Pomodoro=0, Timing=1")
-    task_id: Optional[str] = Field(None, description="Task id")
-    note: Optional[str] = Field(None, description="Focus note")
+    task_id: Optional[str] = Field(default=None, description="Task id")
+    note: Optional[str] = Field(default=None, description="Focus note")
     tasks: List[PomodoroTaskBrief] = Field(default_factory=list, description="Related task briefs")
-    status: Optional[int] = Field(None, description="Pomodoro status")
-    start_time: Optional[datetime] = Field(None, description="Focus start time")
-    end_time: Optional[datetime] = Field(None, description="Focus end time")
+    status: Optional[int] = Field(default=None, description="Pomodoro status")
+    start_time: Optional[datetime] = Field(default=None, description="Focus start time")
+    end_time: Optional[datetime] = Field(default=None, description="Focus end time")
     pause_duration: int = Field(default=0, description="Pause duration in seconds")
     adjust_time: int = Field(default=0, description="Adjusted time in seconds")
     added: bool = Field(default=False, description="Whether record was added")
-    etimestamp: Optional[int] = Field(None, description="Entity timestamp")
-    etag: Optional[str] = Field(None, description="Entity tag")
-    duration: Optional[int] = Field(None, description="Focus duration")
+    etimestamp: Optional[int] = Field(default=None, description="Entity timestamp")
+    etag: Optional[str] = Field(default=None, description="Entity tag")
+    duration: Optional[int] = Field(default=None, description="Focus duration")
     relation_type: List[int] = Field(default_factory=list, description="Relation types")
 
 
@@ -65,13 +65,13 @@ class FocusCreate(BaseApiModel):
     """
 
     type: FocusType = Field(..., description="Focus type: Pomodoro=0, Timing=1")
-    task_id: Optional[str] = Field(None, description="Task id")
-    note: Optional[str] = Field(None, description="Focus note (max 5000 characters)")
-    start_time: Optional[datetime] = Field(None, description="Focus start time")
-    end_time: Optional[datetime] = Field(None, description="Focus end time")
-    pause_duration: Optional[int] = Field(None, description="Pause duration in seconds")
-    duration: Optional[int] = Field(None, description="Focus duration")
-    relation_type: Optional[List[int]] = Field(None, description="Relation types")
+    task_id: Optional[str] = Field(default=None, description="Task id")
+    note: Optional[str] = Field(default=None, description="Focus note (max 5000 characters)")
+    start_time: Optional[datetime] = Field(default=None, description="Focus start time")
+    end_time: Optional[datetime] = Field(default=None, description="Focus end time")
+    pause_duration: Optional[int] = Field(default=None, description="Pause duration in seconds")
+    duration: Optional[int] = Field(default=None, description="Focus duration")
+    relation_type: Optional[List[int]] = Field(default=None, description="Relation types")
 
     @field_serializer("type")
     def serialize_type(self, t: FocusType, _info) -> int:
