@@ -56,6 +56,7 @@ class Dida365Client:
         client_id: Optional[str] = None,
         client_secret: Optional[str] = None,
         service_type: Optional[ServiceType] = None,
+        access_token: Optional[str] = None,
         redirect_uri: str = "http://localhost:8080/callback",
         save_to_env: bool = True,
     ):
@@ -65,8 +66,11 @@ class Dida365Client:
             client_id: OAuth2 client ID (can be set via DIDA365_CLIENT_ID env var)
             client_secret: OAuth2 client secret (can be set via DIDA365_CLIENT_SECRET env var)
             service_type: Service type (dida365 or ticktick)
+            access_token: OAuth2 access token (can be set via DIDA365_ACCESS_TOKEN env var).
+                Constructor arg takes priority over env var.
             redirect_uri: OAuth2 redirect URI
-            save_to_env: Whether to save credentials and token to .env file
+            save_to_env: Whether to save credentials and token to .env file.
+                When False, new tokens from auth are printed to stdout.
         """
         self.save_to_env = save_to_env
 
@@ -87,16 +91,17 @@ class Dida365Client:
         )
         self.http = HttpClient(config=self.config)
 
-        # Load token from env if available and matches current client
-        if settings.access_token and self._verify_token_client():
-            logger.debug("Loading existing token from environment")
+        # Load token: constructor arg takes priority over env var
+        token = access_token or settings.access_token
+        if token and self._verify_token_client():
+            logger.debug("Loading existing token from %s", "constructor" if access_token else "environment")
             self.auth.token = TokenInfo(
-                access_token=settings.access_token,
+                access_token=token,
                 token_type="Bearer",
                 expires_in=3600,  # Default 1 hour
                 scope="tasks:write tasks:read",
             )
-            self.http.token = settings.access_token
+            self.http.token = token
 
     def _verify_token_client(self) -> bool:
         """Verify that the token in env belongs to current client_id."""
@@ -158,15 +163,25 @@ class Dida365Client:
             await self.http.set_token(token_info.access_token)
             if self.save_to_env:
                 self._update_env_file(access_token=token_info.access_token)
+            else:
+                print(f"Access token: {token_info.access_token}")
         return token_info
 
     async def exchange_code(self, code: str) -> TokenInfo:
         """Exchange authorization code for access token."""
+        if not self.save_to_env:
+            logger.warning(
+                "save_to_env=False will print the token to stdout. "
+                "In practice the token appears to be long-lived and exchange_code is rarely called, "
+                "so this is kept as-is for now."
+            )
         token_info = await self.auth.exchange_code(code)
         if token_info:
             await self.http.set_token(token_info.access_token)
             if self.save_to_env:
                 self._update_env_file(access_token=token_info.access_token)
+            else:
+                print(f"Access token: {token_info.access_token}")
         return token_info
 
     # Task-related methods
