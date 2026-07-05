@@ -38,7 +38,7 @@ class ChecklistItemStatus(IntEnum):
     """Checklist item status values."""
 
     NORMAL = 0
-    COMPLETED = 1
+    COMPLETED = 2
 
 
 class ChecklistItem(BaseApiModel, SortableMixin):
