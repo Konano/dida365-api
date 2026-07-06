@@ -16,6 +16,18 @@ T = TypeVar("T")
 
 JSONBody: TypeAlias = Union[Dict[str, Any], List[Dict[str, Any]], None]
 
+
+def _add_exception_note(exc: BaseException, note: str) -> None:
+    """Add a note to an exception, compatible with Python 3.10+.
+
+    BaseException.add_note was added in Python 3.11 (PEP 678).
+    On 3.10 the note is logged as a warning instead.
+    """
+    if hasattr(exc, "add_note"):
+        exc.add_note(note)
+    else:
+        logger.warning("Exception note (Python < 3.11): %s", note)
+
 # The exact headers that work with the API
 DEFAULT_HEADERS = {
     "User-Agent": (
@@ -139,7 +151,7 @@ class HttpClient:
                     try:
                         items.append(item_type(**item))
                     except pydantic.ValidationError as e:
-                        e.add_note(json.dumps(item, ensure_ascii=False))
+                        _add_exception_note(e, json.dumps(item, ensure_ascii=False))
                         raise
                 return items  # type: ignore[return-value]
             else:
@@ -148,14 +160,14 @@ class HttpClient:
                     try:
                         items.append(model(**item))
                     except pydantic.ValidationError as e:
-                        e.add_note(json.dumps(item, ensure_ascii=False))
+                        _add_exception_note(e, json.dumps(item, ensure_ascii=False))
                         raise
                 return items  # type: ignore[return-value]
         else:
             try:
                 return model(**data)
             except pydantic.ValidationError as e:
-                e.add_note(json.dumps(data, ensure_ascii=False))
+                _add_exception_note(e, json.dumps(data, ensure_ascii=False))
                 raise
 
     @retry_on_rate_limit
