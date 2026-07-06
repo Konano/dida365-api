@@ -38,7 +38,8 @@ class ChecklistItemStatus(IntEnum):
     """Checklist item status values."""
 
     NORMAL = 0
-    COMPLETED = 2
+    COMPLETED = 1
+    COMPLETED_UNDOCUMENTED = 2  # API sometimes returns 2, same meaning as COMPLETED
 
 
 class ChecklistItem(BaseApiModel, SortableMixin):
