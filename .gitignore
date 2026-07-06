@@ -30,3 +30,5 @@ requirements-test.txt
 api_doc.md
 test-go/
 scripts/
+
+CLAUDE.md
