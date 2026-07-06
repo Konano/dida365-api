@@ -5,6 +5,7 @@ from functools import wraps
 from typing import Any, Dict, List, NoReturn, Optional, Type, TypeAlias, TypeVar, Union, get_args, get_origin
 
 import httpx
+import pydantic
 from httpx import Timeout
 
 from .config import ApiConfig
@@ -133,11 +134,29 @@ class HttpClient:
             origin = get_origin(model)
             if origin is list:
                 item_type = get_args(model)[0]
-                return [item_type(**item) for item in data]  # type: ignore[return-value]
+                items = []
+                for item in data:
+                    try:
+                        items.append(item_type(**item))
+                    except pydantic.ValidationError as e:
+                        e.add_note(json.dumps(item, ensure_ascii=False))
+                        raise
+                return items  # type: ignore[return-value]
             else:
-                return [model(**item) for item in data]  # type: ignore[return-value]
+                items = []
+                for item in data:
+                    try:
+                        items.append(model(**item))
+                    except pydantic.ValidationError as e:
+                        e.add_note(json.dumps(item, ensure_ascii=False))
+                        raise
+                return items  # type: ignore[return-value]
         else:
-            return model(**data)
+            try:
+                return model(**data)
+            except pydantic.ValidationError as e:
+                e.add_note(json.dumps(data, ensure_ascii=False))
+                raise
 
     @retry_on_rate_limit
     async def _make_request(
