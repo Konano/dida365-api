@@ -107,7 +107,6 @@ class ProjectPermission(str, Enum):
 class ProjectBase(BaseApiModel, SortableMixin):
     """Base model for project data."""
 
-    name: Optional[str] = Field(default=None, description="Project name")
     color: Optional[str] = Field(default=None, description="Project color (hex code)")
     view_mode: Optional[ViewMode] = Field(default=ViewMode.LIST, description="View mode (list, kanban, timeline)")
     kind: Optional[ProjectKind] = Field(default=ProjectKind.TASK, description="Project kind (TASK, NOTE)")
@@ -150,7 +149,7 @@ class ProjectCreate(ProjectBase):
         ```
     """
 
-    name: str = Field(..., description="Project name")  # Override to make required
+    name: str = Field(..., description="Project name")
 
 
 class ProjectUpdate(ProjectBase):
@@ -167,6 +166,7 @@ class ProjectUpdate(ProjectBase):
     """
 
     id: str = Field(..., description="Project identifier")
+    name: Optional[str] = Field(default=None, description="Project name")
 
 
 class Project(ProjectBase, TimestampMixin):
@@ -176,6 +176,7 @@ class Project(ProjectBase, TimestampMixin):
     """
 
     id: str = Field(..., description="Project identifier")
+    name: Optional[str] = Field(default=None, description="Project name")
     closed: bool = Field(default=False, description="Whether the project is closed")
     group_id: Optional[str] = Field(default=None, description="Project group identifier")
     permission: ProjectPermission = Field(default=ProjectPermission.WRITE, description="Access permission level")

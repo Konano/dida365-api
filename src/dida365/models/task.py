@@ -57,7 +57,6 @@ class ChecklistItem(BaseApiModel, SortableMixin):
 class TaskBase(BaseApiModel, SortableMixin):
     """Base model for task data."""
 
-    title: Optional[str] = Field(default=None, description="Task title")
     content: Optional[str] = Field(default=None, description="Task content")
     desc: Optional[str] = Field(default=None, description="Task description")
     is_all_day: bool = Field(default=True, description="Whether the task is all-day")
@@ -95,7 +94,7 @@ class TaskCreate(TaskBase):
         ```
     """
 
-    title: str = Field(..., description="Task title")  # Override to make required
+    title: str = Field(..., description="Task title")
     project_id: str = Field(..., description="Project identifier")
 
 
@@ -115,6 +114,7 @@ class TaskUpdate(TaskBase):
 
     id: str = Field(..., description="Task identifier")
     project_id: str = Field(..., description="Project identifier")
+    title: Optional[str] = Field(default=None, description="Task title")
 
 
 class Task(TaskBase, TimestampMixin):
@@ -125,7 +125,7 @@ class Task(TaskBase, TimestampMixin):
 
     id: str = Field(..., description="Task identifier")
     project_id: str = Field(..., description="Project identifier")
-    title: str = Field(..., description="Task title")  # Override to make required
+    title: str = Field(..., description="Task title")
     status: TaskStatus = Field(default=TaskStatus.NORMAL, description="Task status")
     completed_time: Optional[datetime] = Field(default=None, description="Completion timestamp")
     kind: Optional[str] = Field(default=None, description="Task kind: TEXT, NOTE, or CHECKLIST")
