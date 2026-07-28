@@ -28,6 +28,7 @@ def _add_exception_note(exc: BaseException, note: str) -> None:
     else:
         logger.warning("Exception note (Python < 3.11): %s", note)
 
+
 # The exact headers that work with the API
 DEFAULT_HEADERS = {
     "User-Agent": (
