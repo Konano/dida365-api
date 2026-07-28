@@ -4,7 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "dida365-api"
-version = "0.2.4"
+version = "0.2.5"
 description = "Python client for Dida365/TickTick API"
 readme = "README.md"
 requires-python = ">=3.10"
