@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from enum import IntEnum
 from typing import List, Optional
 
-from pydantic import Field, field_serializer
+from pydantic import Field, field_serializer, field_validator
 
 from .base import BaseApiModel, SortableMixin, TimestampMixin
 
@@ -52,6 +52,14 @@ class ChecklistItem(BaseApiModel, SortableMixin):
     is_all_day: bool = Field(default=True, description="Whether the item is all-day")
     start_date: Optional[datetime] = Field(default=None, description="Start date and time")
     time_zone: Optional[str] = Field(default=None, description="Time zone")
+
+    @field_validator("completed_time", mode="before")
+    @classmethod
+    def parse_completed_time(cls, value: object) -> object:
+        """Convert the millisecond timestamp returned by the API to UTC datetime."""
+        if isinstance(value, int) and not isinstance(value, bool):
+            return datetime.fromtimestamp(value / 1000, tz=timezone.utc)
+        return value
 
 
 class TaskBase(BaseApiModel, SortableMixin):
@@ -123,13 +131,31 @@ class Task(TaskBase, TimestampMixin):
     Includes all task data including system fields like ID and timestamps.
     """
 
+    # Identity and task shape
     id: str = Field(..., description="Task identifier")
     project_id: str = Field(..., description="Project identifier")
     title: str = Field(..., description="Task title")
-    status: TaskStatus = Field(default=TaskStatus.NORMAL, description="Task status")
-    completed_time: Optional[datetime] = Field(default=None, description="Completion timestamp")
     kind: Optional[str] = Field(default=None, description="Task kind: TEXT, NOTE, or CHECKLIST")
+
+    # Hierarchy, Kanban placement, and assignment
+    parent_id: Optional[str] = Field(default=None, description="Parent task identifier")
+    child_ids: List[str] = Field(default_factory=list, description="Direct child task identifiers")
+    column_id: Optional[str] = Field(default=None, description="Kanban column identifier")
+    column_name: Optional[str] = Field(default=None, description="Kanban column name")
+    assignee_username: Optional[str] = Field(default=None, description="Assigned user's username")
+
+    # State
+    status: TaskStatus = Field(default=TaskStatus.NORMAL, description="Task status")
+    progress: Optional[int] = Field(default=None, description="Task progress percentage")
+    completed_time: Optional[datetime] = Field(default=None, description="Completion timestamp")
+
+    # Time behavior and recurrence
+    is_floating: bool = Field(default=False, description="Whether the task time remains fixed across time zones")
+    repeat_from: Optional[str] = Field(default=None, description="Recurrence calculation base")
+
+    # Synchronization metadata
     etag: Optional[str] = Field(default=None, description="Entity tag")
+    etimestamp: Optional[int] = Field(default=None, description="Entity synchronization timestamp in milliseconds")
 
 
 # ---- Task Move ----
